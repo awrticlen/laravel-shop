@@ -33,19 +33,19 @@
           <div class="form-group row">
             <label class="col-form-label col-sm-2 text-md-right">省市区</label>
             <div class="col-sm-3">
-              <select class="form-control" v-model="provinceId">
+              <select class="form-select" v-model="provinceId">
                 <option value="">选择省</option>
                 <option v-for="(name, id) in provinces" :value="id">@{{ name }}</option>
               </select>
             </div>
             <div class="col-sm-3">
-              <select class="form-control" v-model="cityId">
+              <select class="form-select" v-model="cityId">
                 <option value="">选择市</option>
                 <option v-for="(name, id) in cities" :value="id">@{{ name }}</option>
               </select>
             </div>
             <div class="col-sm-3">
-              <select class="form-control" v-model="districtId">
+              <select class="form-select" v-model="districtId">
                 <option value="">选择区</option>
                 <option v-for="(name, id) in districts" :value="id">@{{ name }}</option>
               </select>
