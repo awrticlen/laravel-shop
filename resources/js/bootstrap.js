@@ -1,3 +1,5 @@
+import Vue from 'vue/dist/vue.esm.js';
+window.Vue = Vue;
 import 'bootstrap';
 
 /**
