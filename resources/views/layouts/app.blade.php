@@ -9,6 +9,7 @@
   <title>@yield('title', 'Laravel Shop') - Laravel 电商教程</title>
   <!-- 样式 -->
   @vite(['resources/js/app.js'])
+
 </head>
 <body>
 <div id="app" class="{{ route_class() }}-page">
@@ -19,5 +20,6 @@
   @include('layouts._footer')
 </div>
 <!-- JS 脚本 -->
+@yield('scriptsAfterJs')
 </body>
 </html>

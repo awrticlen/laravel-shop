@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light navbar-static-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container">
     <!-- Branding Image -->
     <a class="navbar-brand " href="{{ url('/') }}">
@@ -10,7 +10,7 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <!-- Left Side Of Navbar -->
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav me-auto">
 
       </ul>
 
@@ -22,7 +22,7 @@
         @else
         <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img src="https://www.gravatar.com/avatar/{{ md5(Auth::user()->email) }}?d=identicon&s=60" class="img-responsive img-circle" width="30px" height="30px" alt="{{ Auth::user()->name }}">
+                    <img src="https://www.gravatar.com/avatar/{{ md5(Auth::user()->email) }}?d=identicon&s=60" class="img-fluid rounded-circle" width="30px" height="30px" alt="{{ Auth::user()->name }}">
                       {{ Auth::user()->name }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">

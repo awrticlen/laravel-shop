@@ -26,10 +26,10 @@
     <!-- inline-template 代表通过内联方式引入组件 -->
     <user-addresses-create-and-edit inline-template>
     @if($address->id)
-    <form class="form-horizontal" role="form" action="{{ route('user_addresses.update', ['user_address' => $address->id]) }}" method="post">
+    <form role="form" action="{{ route('user_addresses.update', ['user_address' => $address->id]) }}" method="post">
       {{ method_field('PUT') }}
   @else
-    <form class="form-horizontal" role="form" action="{{ route('user_addresses.store') }}" method="post">
+    <form role="form" action="{{ route('user_addresses.store') }}" method="post">
   @endif
           <!-- 引入 csrf token 字段 -->
       {{ csrf_field() }}

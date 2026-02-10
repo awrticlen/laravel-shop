@@ -19,7 +19,27 @@
     },
     "dependencies": {
         "china-area-data": "^5.0.1",
+        "jquery": "^4.0.0",
         "lodash": "^4.17.23",
+        "sweetalert": "^2.1.2",
         "vue": "^2.7.16"
-    }
+    },
+    "name": "laravel-shop",
+    "version": "1.0.0",
+    "description": "<p align=\"center\"><a href=\"https://laravel.com\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg\" width=\"400\" alt=\"Laravel Logo\"></a></p>",
+    "main": "vite.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/awrticlen/laravel-shop.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/awrticlen/laravel-shop/issues"
+    },
+    "homepage": "https://github.com/awrticlen/laravel-shop#readme"
 }
