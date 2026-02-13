@@ -20,12 +20,10 @@ class ProductForm
                     ->schema([
                         TextInput::make('title')
                             ->label('商品名称')
-                            ->required()
-                            ->rules(['required']),
+                            ->required(),
                         Textarea::make('description')
                             ->label('商品描述')
                             ->required()
-                            ->rules(['required'])
                             ->columnSpanFull(),
                         FileUpload::make('image')
                             ->label('商品图片')
@@ -60,16 +58,13 @@ class ProductForm
                             ->schema([
                                 TextInput::make('title')
                                     ->label('SKU 名称')
-                                    ->required()
-                                    ->rules(['required']),
+                                    ->required(),
                                 TextInput::make('description')
                                     ->label('SKU 描述')
-                                    ->required()
-                                    ->rules(['required']),
+                                    ->required(),
                                 TextInput::make('price')
                                     ->label('价格')
                                     ->required()
-                                    ->rules(['required', 'numeric', 'min:0.01'])
                                     ->numeric()
                                     ->minValue(0.01)
                                     ->step(0.01)
@@ -77,7 +72,6 @@ class ProductForm
                                 TextInput::make('stock')
                                     ->label('库存')
                                     ->required()
-                                    ->rules(['required', 'integer', 'min:0'])
                                     ->numeric()
                                     ->integer()
                                     ->minValue(0),
