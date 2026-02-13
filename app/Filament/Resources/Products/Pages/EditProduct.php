@@ -16,4 +16,12 @@ class EditProduct extends EditRecord
             DeleteAction::make()->label('删除'),
         ];
     }
+
+    public function afterSave(): void
+    {
+        $this->record->refresh();
+        $skus = $this->record->skus;
+        $minPrice = $skus->isEmpty() ? 0 : (float) $skus->min('price');
+        $this->record->updateQuietly(['price' => $minPrice]);
+    }
 }

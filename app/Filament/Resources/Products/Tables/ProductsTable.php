@@ -7,7 +7,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -28,7 +27,7 @@ class ProductsTable
             ->boolean(),
         TextColumn::make('price')
             ->label('价格')
-            ->money()
+            ->money('CNY')
             ->sortable(),
         TextColumn::make('rating')
             ->label('评分')
@@ -42,8 +41,6 @@ class ProductsTable
             ->label('评论数')
             ->numeric()
             ->sortable(),
-        ImageColumn::make('image')
-            ->label('图片'),
         TextColumn::make('created_at')
             ->label('创建时间')
             ->dateTime()
