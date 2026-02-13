@@ -20,6 +20,8 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = '用户';
 
+    protected static string|\UnitEnum|null $navigationGroup = '用户管理';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function getModelLabel(): string

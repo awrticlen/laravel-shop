@@ -29,7 +29,16 @@ class UserForm
                     ->label('密码')
                     ->password()
                     // 创建时必填，编辑时可留空（避免更新用户资料时被强制改密码）
-                    ->required(fn ($record) => $record === null),
+                    ->required(fn ($record) => $record === null)
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->confirmed(),
+
+                TextInput::make('password_confirmation')
+                    ->label('确认密码')
+                    ->password()
+                    ->required(fn ($record) => $record === null)
+                    ->dehydrated(false)
+                    ->visible(fn ($record) => $record === null),
 
                 Select::make('roles')
                     ->label('角色')
