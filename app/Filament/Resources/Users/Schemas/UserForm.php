@@ -37,8 +37,7 @@ class UserForm
                     ->label('确认密码')
                     ->password()
                     ->required(fn ($record) => $record === null)
-                    ->dehydrated(false)
-                    ->visible(fn ($record) => $record === null),
+                    ->dehydrated(false),
 
                 Select::make('roles')
                     ->label('角色')
