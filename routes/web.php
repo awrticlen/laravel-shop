@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\UserAddressesController; // 新增这一行
+use App\Http\Controllers\ProductsController;
 
 // 无 symlink 时通过路由提供 storage 文件（避免 /storage 被 nginx 直接 403，改用 serve-storage）
 Route::get('serve-storage/{path}', function (string $path) {
@@ -15,7 +16,8 @@ Route::get('serve-storage/{path}', function (string $path) {
     return response()->file($fullPath);
 })->where('path', '.*')->name('storage.serve');
 
-Route::get('/', [PagesController::class, 'root'])->name('root');
+Route::redirect('/', '/products')->name('root');
+Route::get('products', [ProductsController::class, 'index'])->name('products.index');
 Auth::routes(['verify' => true]);
 
 // auth 中间件代表需要登录，verified中间件代表需要经过邮箱验证
