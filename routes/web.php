@@ -18,6 +18,7 @@ Route::get('serve-storage/{path}', function (string $path) {
 
 Route::redirect('/', '/products')->name('root');
 Route::get('products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('products/{product}', [ProductsController::class, 'show'])->name('products.show');
 Auth::routes(['verify' => true]);
 
 // auth 中间件代表需要登录，verified中间件代表需要经过邮箱验证
