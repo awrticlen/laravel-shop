@@ -186,7 +186,9 @@
             amount: amount,
           })
             .then(function () {
-              swal('加入购物车成功', '', 'success');
+              swal('加入购物车成功', '', 'success').then(function () {
+                location.href = '{{ route('cart.index') }}';
+              });
             })
             .catch(function (error) {
               if (!error.response) {
