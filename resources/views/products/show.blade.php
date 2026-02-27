@@ -165,6 +165,62 @@
             });
         });
       }
+
+      // 加入购物车按钮：发送 ajax 请求
+      var addToCartBtn = document.querySelector('.btn-add-to-cart');
+      if (addToCartBtn && typeof axios !== 'undefined' && typeof swal !== 'undefined') {
+        addToCartBtn.addEventListener('click', function () {
+          // 当前选中的 SKU
+          var checkedSku = document.querySelector('input[name="skus"]:checked');
+          if (!checkedSku) {
+            swal('请选择商品 SKU', '', 'error');
+            return;
+          }
+
+          // 购买数量
+          var amountInput = document.querySelector('.cart_amount input');
+          var amount = amountInput ? amountInput.value : 1;
+
+          axios.post('{{ route('cart.add') }}', {
+            sku_id: checkedSku.value,
+            amount: amount,
+          })
+            .then(function () {
+              swal('加入购物车成功', '', 'success');
+            })
+            .catch(function (error) {
+              if (!error.response) {
+                swal('系统错误', '', 'error');
+                return;
+              }
+
+              // 未登录
+              if (error.response.status === 401) {
+                swal('请先登录', '', 'error');
+                return;
+              }
+
+              // 参数校验失败
+              if (error.response.status === 422 && error.response.data && error.response.data.errors) {
+                var errors = error.response.data.errors;
+                var html = '';
+                Object.keys(errors).forEach(function (field) {
+                  errors[field].forEach(function (msg) {
+                    html += msg + '<br>';
+                  });
+                });
+                var div = document.createElement('div');
+                div.innerHTML = html;
+                swal({ content: div, icon: 'error' });
+                return;
+              }
+
+              // 其他错误，尽量把后端消息展示出来
+              var msg = error.response.data && (error.response.data.msg || error.response.data.message);
+              swal(msg || '系统错误', '', 'error');
+            });
+        });
+      }
     });
   </script>
 @endsection
