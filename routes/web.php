@@ -18,6 +18,9 @@ Route::get('serve-storage/{path}', function (string $path) {
 
 Route::redirect('/', '/products')->name('root');
 Route::get('products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('products/favorites', [ProductsController::class, 'favorites'])
+    ->middleware(['auth', 'verified'])
+    ->name('products.favorites');
 Route::get('products/{product}', [ProductsController::class, 'show'])->name('products.show');
 Auth::routes(['verify' => true]);
 
