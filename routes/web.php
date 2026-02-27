@@ -6,6 +6,7 @@ use App\Http\Controllers\PagesController;
 use App\Http\Controllers\UserAddressesController; // 新增这一行
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrdersController;
 // 无 symlink 时通过路由提供 storage 文件（避免 /storage 被 nginx 直接 403，改用 serve-storage）
 Route::get('serve-storage/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
@@ -39,4 +40,5 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('cart', [CartController::class, 'add'])->name('cart.add');
     Route::get('cart', [CartController::class, 'index'])->name('cart.index');
     Route::delete('cart/{sku}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('orders', [OrdersController::class, 'store'])->name('orders.store');
 });
