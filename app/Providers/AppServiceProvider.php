@@ -23,7 +23,9 @@ class AppServiceProvider extends ServiceProvider
         // 往服务容器中注入一个名为 alipay 的单例对象
         $this->app->singleton('alipay', function() use ($config) {
             //调用Yansongda\Pay来创建一个支付宝支付对象
-            return Pay::alipay($config);
+            $config               = config('pay.alipay');
+            $config['notify_url'] = route('payment.alipay.notify');
+            $config['return_url'] = route('payment.alipay.return');
         });
 
         $this->app->singleton('wechat_pay', function() use ($config) {

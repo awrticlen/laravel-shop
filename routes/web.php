@@ -7,6 +7,7 @@ use App\Http\Controllers\UserAddressesController; // 新增这一行
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\PaymentController;
 // 无 symlink 时通过路由提供 storage 文件（避免 /storage 被 nginx 直接 403，改用 serve-storage）
 Route::get('serve-storage/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
@@ -43,5 +44,8 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('orders', [OrdersController::class, 'store'])->name('orders.store');
     Route::get('orders', [OrdersController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
-});
-
+    Route::get('payment/{order}/alipay', [PaymentController::class, 'payByAlipay'])->name('payment.alipay');
+    Route::get('payment/alipay/return', [PaymentController::class, 'alipayReturn'])->name('payment.alipay.return');
+   });
+   //服务器端回调的路由不能放到带有 auth 中间件的路由组中，因为支付宝的服务器请求不会带有认证信息。
+   Route::post('payment/alipay/notify', [PaymentController::class, 'alipayNotify'])->name('payment.alipay.notify');
