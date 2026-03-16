@@ -84,6 +84,7 @@ return [
 
 'faker_locale' => 'zh_CN',
 
+    'ngrok_url' => env('NGROK_URL'),
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
