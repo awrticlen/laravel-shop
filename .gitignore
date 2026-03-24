@@ -18,6 +18,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/cert/*.crt
+/storage/cert/*.pem
 /vendor
 Homestead.json
 Homestead.yaml
