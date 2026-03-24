@@ -75,8 +75,36 @@ class OrderInfolist
                         'delivered' => 'success',
                         default => 'gray',
                     }),
-                TextEntry::make('ship_data')
+                TextEntry::make('shipping_info')
                     ->label('物流信息')
+                    ->state(function ($record): string {
+                        $state = $record->ship_data;
+
+                        if (is_string($state) && $state !== '') {
+                            $decoded = json_decode($state, true);
+                            if (json_last_error() === JSON_ERROR_NONE) {
+                                $state = $decoded;
+                            }
+                        }
+
+                        if (!is_array($state) || empty($state)) {
+                            return '-';
+                        }
+
+                        $companyMap = [
+                            'SF' => '顺丰',
+                            'YTO' => '圆通',
+                            'ZTO' => '中通',
+                            'YD' => '韵达',
+                            'STO' => '申通',
+                        ];
+
+                        $companyCode = $state['express_company'] ?? '';
+                        $companyName = $companyMap[$companyCode] ?? ($companyCode ?: '-');
+                        $expressNo = $state['express_no'] ?? '-';
+
+                        return $companyName . ' / ' . $expressNo;
+                    })
                     ->placeholder('-')
                     ->columnSpanFull(),
                 TextEntry::make('extra')

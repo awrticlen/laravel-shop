@@ -34,12 +34,22 @@ class PaymentController extends Controller
     {
         try {
             // 校验支付宝回调参数（v3）
-            Pay::alipay()->callback();
+            $data = Pay::alipay()->callback();
         } catch (\Exception $e) {
             return view('pages.error', ['msg' => '数据不正确']);
         }
 
-        return view('pages.success', ['msg' => '付款成功']);
+        $order = Order::where('no', $data->out_trade_no)->first();
+        if (!$order) {
+            return view('pages.error', ['msg' => '订单不存在']);
+        }
+
+        if ($order->paid_at) {
+            return view('pages.success', ['msg' => '付款成功']);
+        }
+
+        // notify 可能稍后到达，这里先给用户友好提示
+        return view('pages.success', ['msg' => '支付已受理，订单状态同步中，请稍后刷新订单页']);
     }
 
     // 服务器端回调
