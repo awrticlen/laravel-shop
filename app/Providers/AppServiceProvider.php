@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\OrderPaid;
+use App\Listeners\SendOrderPaidMail;
+use App\Listeners\UpdateProductSoldCount;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Yansongda\Pay\Pay;
 
@@ -48,5 +52,8 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         \Illuminate\Pagination\Paginator::useBootstrap();
+
+        Event::listen(OrderPaid::class, UpdateProductSoldCount::class);
+        Event::listen(OrderPaid::class, SendOrderPaidMail::class);
     }
 }
