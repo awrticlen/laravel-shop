@@ -45,6 +45,18 @@
         <div class="line"><div class="line-label">收货地址：</div><div class="line-value">{{ join(' ', $order->address) }}</div></div>
         <div class="line"><div class="line-label">订单备注：</div><div class="line-value">{{ $order->remark ?: '-' }}</div></div>
         <div class="line"><div class="line-label">订单编号：</div><div class="line-value">{{ $order->no }}</div></div>
+        <!-- 输出物流状态 -->
+        <div class="line">
+          <div class="line-label">物流状态：</div>
+          <div class="line-value">{{ \App\Models\Order::$shipStatusMap[$order->ship_status] }}</div>
+        </div>
+        <!-- 如果有物流信息则展示 -->
+        @if($order->ship_data)
+        <div class="line">
+          <div class="line-label">物流信息：</div>
+          <div class="line-value">{{ $order->ship_data['express_company'] }} {{ $order->ship_data['express_no'] }}</div>
+        </div>
+        @endif
       </div>
       <div class="order-summary text-end">
         <div class="total-amount">
@@ -54,7 +66,7 @@
         <div>
           <span>订单状态：</span>
           <div class="value">
-            @if($order->paid_at)
+          @if(!$order->paid_at && !$order->closed)
               @if($order->refund_status === \App\Models\Order::REFUND_STATUS_PENDING)
                 已支付
               @else
@@ -66,6 +78,12 @@
               未支付
             @endif
           </div>
+          <!-- 如果订单的发货状态为已发货则展示确认收货按钮 -->
+          @if($order->ship_status === \App\Models\Order::SHIP_STATUS_DELIVERED)
+          <div class="receive-button">
+            <button type="button" id="btn-receive" class="btn btn-sm btn-success">确认收货</button>
+          </div>
+          @endif
         
         </div>
         <!-- 支付按钮开始 -->
@@ -81,4 +99,62 @@
 </div>
 </div>
 </div>
+@endsection
+
+@section('scriptsAfterJs')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('btn-receive');
+  if (!btn) return;
+
+  const submitReceive = async function () {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const url = @json(route('orders.received', [$order->id]));
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken ?? ''
+        },
+        body: new URLSearchParams()
+      });
+
+      if (res.ok) {
+        location.reload();
+        return;
+      }
+
+      alert('确认收货失败，请稍后重试');
+    } catch (e) {
+      alert('网络异常，请稍后重试');
+    }
+  };
+
+  btn.addEventListener('click', function () {
+    // 使用项目已引入的 sweetalert（教程图二风格）
+    if (typeof window.swal === 'function') {
+      window.swal({
+        title: '确认已经收到商品？',
+        icon: 'warning',
+        dangerMode: true,
+        buttons: ['取消', '确认收到'],
+      }).then(function (ret) {
+        if (!ret) return;
+        submitReceive();
+      });
+
+      return;
+    }
+
+    // 兜底：sweetalert 未加载时使用原生 confirm
+    const ok = window.confirm('确认已经收到商品？');
+    if (!ok) return;
+    submitReceive();
+  });
+});
+</script>
 @endsection

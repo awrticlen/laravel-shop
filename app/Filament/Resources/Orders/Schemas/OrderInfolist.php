@@ -68,11 +68,13 @@ class OrderInfolist
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
                         'pending' => '待发货',
                         'delivered' => '已发货',
+                        'received' => '已收货',
                         default => (string) $state,
                     })
                     ->color(fn (?string $state): string => match ($state) {
                         'pending' => 'gray',
                         'delivered' => 'success',
+                        'received' => 'success',
                         default => 'gray',
                     }),
                 TextEntry::make('shipping_info')
