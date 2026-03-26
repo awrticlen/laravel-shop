@@ -480,6 +480,18 @@ body {
     }
   }
 
+  // 去掉评价页底部提交区域的分隔横线
+  table.table {
+    // 提交按钮上方那条线通常来自 tbody 最后一行的 border-bottom
+    tbody tr:last-child td {
+      border-bottom: 0 !important;
+    }
+    tfoot td {
+      border-top: 0 !important;
+      border-bottom: 0 !important;
+    }
+  }
+
   textarea {
     border-radius: 0px;
   }

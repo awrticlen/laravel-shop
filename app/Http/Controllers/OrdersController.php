@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Services\CartService;
 use App\Services\OrderService;
 use App\Http\Requests\SendReviewRequest;
+use App\Events\OrderReviewed;
 
 class OrdersController extends Controller
 {
@@ -103,7 +104,7 @@ class OrdersController extends Controller
             // 将订单标记为已评价
             $order->update(['reviewed' => true]);
         });    
-
+        event(new OrderReviewed($order));
         return redirect()->back();
     }
 }

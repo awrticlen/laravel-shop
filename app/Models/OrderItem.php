@@ -10,7 +10,9 @@ class OrderItem extends Model
     use HasFactory;
 
     protected $fillable = ['amount', 'price', 'rating', 'review', 'reviewed_at'];
-    protected $dates = ['reviewed_at'];
+    protected $casts = [
+        'reviewed_at' => 'datetime',
+    ];
     public $timestamps = false;
 
     public function product()
