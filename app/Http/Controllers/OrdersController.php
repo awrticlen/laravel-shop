@@ -116,13 +116,15 @@ class OrdersController extends Controller
         if (!$order->paid_at) {
             throw new InvalidRequestException('该订单未支付，不可退款');
         }
-        // 判断订单退款状态是否正确
-        if ($order->refund_status !== Order::REFUND_STATUS_PENDING) {
-            throw new InvalidRequestException('该订单已经申请过退款，请勿重复申请');
+        // 仅允许“未退款”或“退款失败”时申请（支持二次申请）
+        if (! in_array($order->refund_status, [Order::REFUND_STATUS_PENDING, Order::REFUND_STATUS_FAILED], true)) {
+            throw new InvalidRequestException('当前退款状态不可申请退款');
         }
         // 将用户输入的退款理由放到订单的 extra 字段中
         $extra                  = $order->extra ?: [];
         $extra['refund_reason'] = $request->input('reason');
+        // 二次申请时，清理上次拒绝理由，避免页面误导
+        unset($extra['refund_disagree_reason']);
         // 将订单退款状态改为已申请退款
         $order->update([
             'refund_status' => Order::REFUND_STATUS_APPLIED,

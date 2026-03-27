@@ -77,26 +77,35 @@
         <div>
           <span>订单状态：</span>
           <div class="value">
-          @if($order->paid_at)
-              @if($order->refund_status === \App\Models\Order::REFUND_STATUS_PENDING)
-                已支付
-              @else
-                {{ \App\Models\Order::$refundStatusMap[$order->refund_status] }}
-              @endif
+            @if($order->paid_at)
+              已支付
             @elseif($order->closed)
               已关闭
             @else
               未支付
             @endif
           </div>
+          </div>
+        @if(isset($order->extra['refund_disagree_reason']))
+        <div>
+          <span>拒绝退款理由：</span>
+          <div class="value">{{ $order->extra['refund_disagree_reason'] }}</div>
+        </div>
+        @endif
           <!-- 如果订单的发货状态为已发货则展示确认收货按钮 -->
           @if($order->ship_status === \App\Models\Order::SHIP_STATUS_DELIVERED)
           <div class="receive-button">
             <button type="button" id="btn-receive" class="btn btn-sm btn-success">确认收货</button>
           </div>
           @endif
-        <!-- 订单已支付，且退款状态是未退款时展示申请退款按钮 -->
-        @if($order->paid_at && $order->refund_status === \App\Models\Order::REFUND_STATUS_PENDING)
+        <!-- 订单已支付，且未申请退款或退款失败时展示申请退款按钮（支持二次申请） -->
+        @if(
+          $order->paid_at &&
+          in_array($order->refund_status, [
+            \App\Models\Order::REFUND_STATUS_PENDING,
+            \App\Models\Order::REFUND_STATUS_FAILED,
+          ], true)
+        )
         <div class="refund-button">
           <button type="button" class="btn btn-sm btn-danger" id="btn-apply-refund">申请退款</button>
         </div>
