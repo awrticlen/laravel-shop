@@ -57,6 +57,17 @@
           <div class="line-value">{{ $order->ship_data['express_company'] }} {{ $order->ship_data['express_no'] }}</div>
         </div>
         @endif
+        <!-- 订单已支付，且退款状态不是未退款时展示退款信息 -->
+        @if($order->paid_at && $order->refund_status !== \App\Models\Order::REFUND_STATUS_PENDING)
+        <div class="line">
+          <div class="line-label">退款状态：</div>
+          <div class="line-value">{{ \App\Models\Order::$refundStatusMap[$order->refund_status] }}</div>
+        </div>
+        <div class="line">
+          <div class="line-label">退款理由：</div>
+          <div class="line-value">{{ $order->extra['refund_reason'] ?? '-' }}</div>
+        </div>
+        @endif
       </div>
       <div class="order-summary text-end">
         <div class="total-amount">
@@ -66,7 +77,7 @@
         <div>
           <span>订单状态：</span>
           <div class="value">
-          @if(!$order->paid_at && !$order->closed)
+          @if($order->paid_at)
               @if($order->refund_status === \App\Models\Order::REFUND_STATUS_PENDING)
                 已支付
               @else
@@ -84,15 +95,20 @@
             <button type="button" id="btn-receive" class="btn btn-sm btn-success">确认收货</button>
           </div>
           @endif
-        
+        <!-- 订单已支付，且退款状态是未退款时展示申请退款按钮 -->
+        @if($order->paid_at && $order->refund_status === \App\Models\Order::REFUND_STATUS_PENDING)
+        <div class="refund-button">
+          <button type="button" class="btn btn-sm btn-danger" id="btn-apply-refund">申请退款</button>
+        </div>
+        @endif
         </div>
         <!-- 支付按钮开始 -->
-@if(!$order->paid_at && !$order->closed)
-<div class="payment-buttons">
-  <a class="btn btn-primary btn-sm" href="{{ route('payment.alipay', ['order' => $order->id]) }}">支付宝支付</a>
-</div>
-@endif
-<!-- 支付按钮结束 -->
+        @if(!$order->paid_at && !$order->closed)
+        <div class="payment-buttons">
+          <a class="btn btn-primary btn-sm" href="{{ route('payment.alipay', ['order' => $order->id]) }}">支付宝支付</a>
+        </div>
+        @endif
+        <!-- 支付按钮结束 -->
       </div>
     </div>
   </div>
@@ -105,7 +121,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const btn = document.getElementById('btn-receive');
-  if (!btn) return;
 
   const submitReceive = async function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -134,27 +149,104 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
-  btn.addEventListener('click', function () {
-    // 使用项目已引入的 sweetalert（教程图二风格）
-    if (typeof window.swal === 'function') {
-      window.swal({
-        title: '确认已经收到商品？',
-        icon: 'warning',
-        dangerMode: true,
-        buttons: ['取消', '确认收到'],
-      }).then(function (ret) {
-        if (!ret) return;
-        submitReceive();
+  if (btn) {
+    btn.addEventListener('click', function () {
+      // 使用项目已引入的 sweetalert（教程图二风格）
+      if (typeof window.swal === 'function') {
+        window.swal({
+          title: '确认已经收到商品？',
+          icon: 'warning',
+          dangerMode: true,
+          buttons: ['取消', '确认收到'],
+        }).then(function (ret) {
+          if (!ret) return;
+          submitReceive();
+        });
+
+        return;
+      }
+
+      // 兜底：sweetalert 未加载时使用原生 confirm
+      const ok = window.confirm('确认已经收到商品？');
+      if (!ok) return;
+      submitReceive();
+    });
+  }
+
+  const refundBtn = document.getElementById('btn-apply-refund');
+  if (refundBtn) {
+    refundBtn.addEventListener('click', function () {
+      if (typeof window.swal === 'function') {
+        window.swal({
+          text: '请输入退款理由',
+          content: 'input',
+        }).then(async function (input) {
+          if (!input) {
+            window.swal('退款理由不可空', '', 'error');
+            return;
+          }
+
+          try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const url = @json(route('orders.apply_refund', [$order->id]));
+            const res = await fetch(url, {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken ?? '',
+              },
+              body: JSON.stringify({ reason: input }),
+            });
+
+            if (!res.ok) {
+              window.swal('申请退款失败', '', 'error');
+              return;
+            }
+
+            window.swal('申请退款成功', '', 'success').then(function () {
+              location.reload();
+            });
+          } catch (e) {
+            window.swal('网络异常，请稍后重试', '', 'error');
+          }
+        });
+
+        return;
+      }
+
+      const input = window.prompt('请输入退款理由');
+      if (!input) {
+        alert('退款理由不可空');
+        return;
+      }
+
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const url = @json(route('orders.apply_refund', [$order->id]));
+
+      fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken ?? '',
+        },
+        body: JSON.stringify({ reason: input }),
+      }).then(function (res) {
+        if (!res.ok) {
+          alert('申请退款失败');
+          return;
+        }
+
+        alert('申请退款成功');
+        location.reload();
+      }).catch(function () {
+        alert('网络异常，请稍后重试');
       });
-
-      return;
-    }
-
-    // 兜底：sweetalert 未加载时使用原生 confirm
-    const ok = window.confirm('确认已经收到商品？');
-    if (!ok) return;
-    submitReceive();
-  });
+    });
+  }
 });
 </script>
 @endsection

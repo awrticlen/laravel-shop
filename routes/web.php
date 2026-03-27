@@ -48,6 +48,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('orders/{order}/received', [OrdersController::class, 'received'])->name('orders.received');
     Route::get('orders/{order}/review', [OrdersController::class, 'review'])->name('orders.review.show');
    Route::post('orders/{order}/review', [OrdersController::class, 'sendReview'])->name('orders.review.store');
+   Route::post('orders/{order}/apply_refund', [OrdersController::class, 'applyRefund'])->name('orders.apply_refund');
    });
 // 前端回调路由不放到 auth 组中，避免跨域名回跳时因未登录态被中间件拦截
 Route::get('payment/alipay/return', [PaymentController::class, 'alipayReturn'])->name('payment.alipay.return');

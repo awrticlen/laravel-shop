@@ -27,18 +27,21 @@ class OrdersTable
                 TextColumn::make('paid_at')
                     ->label('支付时间')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('payment_method')
                     ->label('支付方式')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('payment_no')
                     ->label('支付单号')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('refund_status')
                     ->label('退款状态')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
-                        'pending' => '待处理',
+                        'pending' => '未退款',
                         'applied' => '已申请',
                         'success' => '退款成功',
                         'failed' => '退款失败',
@@ -51,30 +54,37 @@ class OrdersTable
                         'failed' => 'danger',
                         default => 'gray',
                     })
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('refund_no')
                     ->label('退款单号')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 IconColumn::make('closed')
                     ->label('已关闭')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(),
                 IconColumn::make('reviewed')
                     ->label('已评价')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(),
                 TextColumn::make('ship_status')
-                    ->label('发货状态')
+                    ->label('物流状态')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
                         'pending' => '待发货',
                         'delivered' => '已发货',
+                        'received' => '已收货',
                         default => (string) $state,
                     })
                     ->color(fn (?string $state): string => match ($state) {
                         'pending' => 'gray',
                         'delivered' => 'success',
+                        'received' => 'success',
                         default => 'gray',
                     })
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('创建时间')
                     ->dateTime()

@@ -40,7 +40,7 @@ class OrderInfolist
                     ->label('退款状态')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
-                        'pending' => '待处理',
+                        'pending' => '未退款',
                         'applied' => '已申请',
                         'success' => '退款成功',
                         'failed' => '退款失败',
@@ -63,7 +63,7 @@ class OrderInfolist
                     ->label('已评价')
                     ->boolean(),
                 TextEntry::make('ship_status')
-                    ->label('发货状态')
+                    ->label('物流状态')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
                         'pending' => '待发货',
