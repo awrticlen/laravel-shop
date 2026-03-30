@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use App\Exceptions\InternalException;
+use App\Exceptions\InvalidRequestException;
 use App\Models\Order;
+use App\Services\OrderRefundService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -109,7 +112,9 @@ class OrderInfolist
                                     ->label('发货')
                                     ->button()
                                     ->color('success')
-                                    ->visible(fn ($record): bool => filled($record->paid_at) && $record->ship_status === Order::SHIP_STATUS_PENDING)
+                                    ->visible(fn ($record): bool => filled($record->paid_at)
+                                        && $record->ship_status === Order::SHIP_STATUS_PENDING
+                                        && $record->refund_status !== Order::REFUND_STATUS_SUCCESS)
                                     ->form([
                                         Select::make('express_company')
                                             ->label('物流公司')
@@ -171,12 +176,34 @@ class OrderInfolist
                                     ->visible(fn ($record): bool => $record->refund_status === Order::REFUND_STATUS_APPLIED)
                                     ->requiresConfirmation()
                                     ->action(function ($record): void {
-                                        $record->update([
-                                            'refund_status' => Order::REFUND_STATUS_SUCCESS,
-                                        ]);
+                                        try {
+                                            app(OrderRefundService::class)->agreeRefund($record);
+                                        } catch (InvalidRequestException | InternalException $e) {
+                                            Notification::make()
+                                                ->title('退款未成功')
+                                                ->body($e->getMessage())
+                                                ->danger()
+                                                ->send();
+
+                                            return;
+                                        }
+
+                                        $record->refresh();
+
+                                        if ($record->refund_status === Order::REFUND_STATUS_FAILED) {
+                                            Notification::make()
+                                                ->title('支付宝退款失败')
+                                                ->body(
+                                                    '错误码：'.($record->extra['refund_failed_code'] ?? '未知')
+                                                )
+                                                ->danger()
+                                                ->send();
+
+                                            return;
+                                        }
 
                                         Notification::make()
-                                            ->title('已同意退款')
+                                            ->title('已同意并完成退款')
                                             ->success()
                                             ->send();
                                     }),

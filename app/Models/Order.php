@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -104,5 +105,13 @@ class Order extends Model
         \Log::warning('find order no failed');
 
         return false;
+    }
+    public static function getAvailableRefundNo(): string
+    {
+        do {
+            $no = str_replace('-', '', (string) Str::uuid());
+        } while (self::query()->where('refund_no', $no)->exists());
+
+        return $no;
     }
 }

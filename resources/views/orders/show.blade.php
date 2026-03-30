@@ -110,7 +110,6 @@
           <button type="button" class="btn btn-sm btn-danger" id="btn-apply-refund">申请退款</button>
         </div>
         @endif
-        </div>
         <!-- 支付按钮开始 -->
         @if(!$order->paid_at && !$order->closed)
         <div class="payment-buttons">
