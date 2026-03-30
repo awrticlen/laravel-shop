@@ -155,11 +155,14 @@
 
           var addressSelect = orderForm.querySelector('select[name="address"]');
           var remarkTextarea = orderForm.querySelector('textarea[name="remark"]');
+          var couponInput = orderForm.querySelector('input[name="coupon_code"]');
+          var couponCode = couponInput ? (couponInput.value || '').trim() : '';
 
           var req = {
             address_id: addressSelect ? addressSelect.value : null,
             items: [],
             remark: remarkTextarea ? remarkTextarea.value : '',
+            coupon_code: couponCode,
           };
 
           // 遍历购物车中的每一行
