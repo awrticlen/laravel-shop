@@ -8,6 +8,8 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CouponCodesController;
+
 // 无 symlink 时通过路由提供 storage 文件（避免 /storage 被 nginx 直接 403，改用 serve-storage）
 Route::get('serve-storage/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
@@ -47,10 +49,11 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('payment/{order}/alipay', [PaymentController::class, 'payByAlipay'])->name('payment.alipay');
     Route::post('orders/{order}/received', [OrdersController::class, 'received'])->name('orders.received');
     Route::get('orders/{order}/review', [OrdersController::class, 'review'])->name('orders.review.show');
-   Route::post('orders/{order}/review', [OrdersController::class, 'sendReview'])->name('orders.review.store');
-   Route::post('orders/{order}/apply_refund', [OrdersController::class, 'applyRefund'])->name('orders.apply_refund');
-   });
+    Route::post('orders/{order}/review', [OrdersController::class, 'sendReview'])->name('orders.review.store');
+    Route::post('orders/{order}/apply_refund', [OrdersController::class, 'applyRefund'])->name('orders.apply_refund');
+    Route::get('coupon_codes/{code}', [CouponCodesController::class, 'show'])->name('coupon_codes.show');
+});
 // 前端回调路由不放到 auth 组中，避免跨域名回跳时因未登录态被中间件拦截
-Route::get('payment/alipay/return', [PaymentController::class, 'alipayReturn'])->name('payment.alipay.return');
+    Route::get('payment/alipay/return', [PaymentController::class, 'alipayReturn'])->name('payment.alipay.return');
    //服务器端回调的路由不能放到带有 auth 中间件的路由组中，因为支付宝的服务器请求不会带有认证信息。
-   Route::post('payment/alipay/notify', [PaymentController::class, 'alipayNotify'])->name('payment.alipay.notify');
+    Route::post('payment/alipay/notify', [PaymentController::class, 'alipayNotify'])->name('payment.alipay.notify');

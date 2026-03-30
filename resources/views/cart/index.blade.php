@@ -51,8 +51,8 @@
       </tbody>
     </table>
     <div>
-  <form class="form-horizontal" role="form" id="order-form">
-    <div class="form-group row">
+  <form role="form" id="order-form">
+    <div class="row mb-3 align-items-center">
       <label class="col-form-label col-sm-3 text-md-end">选择收货地址</label>
       <div class="col-sm-9 col-md-7">
         <select class="form-select" name="address">
@@ -62,13 +62,26 @@
         </select>
       </div>
     </div>
-    <div class="form-group row">
+    <div class="row mb-3 align-items-center">
       <label class="col-form-label col-sm-3 text-md-end">备注</label>
       <div class="col-sm-9 col-md-7">
         <textarea name="remark" class="form-control" rows="3"></textarea>
       </div>
     </div>
-    <div class="form-group">
+    <!-- 优惠码开始 -->
+<div class="row mb-3 align-items-center">
+  <label class="col-form-label col-sm-3 text-md-end">优惠码</label>
+  <div class="col-sm-4">
+    <input type="text" class="form-control" name="coupon_code">
+    <span class="form-text text-muted" id="coupon_desc"></span>
+  </div>
+  <div class="col-sm-3">
+    <button type="button" class="btn btn-success" id="btn-check-coupon">检查</button>
+    <button type="button" class="btn btn-danger" style="display: none;" id="btn-cancel-coupon">取消</button>
+  </div>
+</div>
+<!-- 优惠码结束 -->
+    <div class="row mb-3">
       <div class="offset-sm-3 col-sm-3">
         <button type="button" class="btn btn-primary btn-create-order">提交订单</button>
       </div>
@@ -201,6 +214,63 @@
                 swal('系统错误', '', 'error');
               }
             });
+        });
+      }
+
+      // 检查优惠码按钮点击事件（原生 JS）
+      var checkCouponBtn = document.getElementById('btn-check-coupon');
+      var cancelCouponBtn = document.getElementById('btn-cancel-coupon');
+      var couponInput = document.querySelector('input[name="coupon_code"]');
+      var couponDesc = document.getElementById('coupon_desc');
+
+      if (
+        checkCouponBtn &&
+        cancelCouponBtn &&
+        couponInput &&
+        couponDesc &&
+        typeof axios !== 'undefined' &&
+        typeof swal !== 'undefined'
+      ) {
+        checkCouponBtn.addEventListener('click', function () {
+          var code = (couponInput.value || '').trim();
+
+          if (!code) {
+            swal('请输入优惠码', '', 'warning');
+            return;
+          }
+
+          axios
+            .get('/coupon_codes/' + encodeURIComponent(code))
+            .then(function (response) {
+              couponDesc.textContent = response.data.description || '';
+              couponInput.readOnly = true; // 禁用输入框（保留值方便订单提交）
+              cancelCouponBtn.style.display = ''; // 显示取消按钮
+              checkCouponBtn.style.display = 'none'; // 隐藏检查按钮
+            })
+            .catch(function (error) {
+              var status = error && error.response ? error.response.status : null;
+
+              if (status === 404) {
+                swal('优惠码不存在', '', 'error');
+              } else if (status === 403) {
+                var msg =
+                  error.response && error.response.data && error.response.data.msg
+                    ? error.response.data.msg
+                    : '请求被拒绝';
+                swal(msg, '', 'error');
+              } else if (status === 401) {
+                swal('请先登录', '', 'error');
+              } else {
+                swal('系统内部错误', '', 'error');
+              }
+            });
+        });
+
+        cancelCouponBtn.addEventListener('click', function () {
+          couponDesc.textContent = '';
+          couponInput.readOnly = false;
+          cancelCouponBtn.style.display = 'none';
+          checkCouponBtn.style.display = '';
         });
       }
     });
