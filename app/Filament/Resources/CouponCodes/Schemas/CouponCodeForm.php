@@ -24,29 +24,39 @@ class CouponCodeForm
 
                         TextInput::make('code')
                             ->label('优惠码')
-                            ->required()
+                            ->nullable()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
 
                         Select::make('type')
                             ->label('类型')
                             ->options(CouponCode::$typeMap)
-                            ->required(),
+                            ->required()
+                            ->default(CouponCode::TYPE_FIXED),
 
                         TextInput::make('value')
                             ->label('折扣')
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->rules(function ($get) {
+                                if ($get('type') === CouponCode::TYPE_PERCENT) {
+                                    return ['required', 'numeric', 'between:1,99'];
+                                }
+
+                                return ['required', 'numeric', 'min:0.01'];
+                            }),
 
                         TextInput::make('min_amount')
                             ->label('最低金额')
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->minValue(0),
 
                         TextInput::make('total')
                             ->label('总量')
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->minValue(0),
 
                         TextInput::make('used')
                             ->label('已用')
@@ -54,10 +64,12 @@ class CouponCodeForm
                             ->disabled(),
 
                         DateTimePicker::make('not_before')
-                            ->label('开始时间'),
+                            ->label('开始时间')
+                            ->nullable(),
 
                         DateTimePicker::make('not_after')
-                            ->label('结束时间'),
+                            ->label('结束时间')
+                            ->nullable(),
 
                         Toggle::make('enabled')
                             ->label('是否启用')
