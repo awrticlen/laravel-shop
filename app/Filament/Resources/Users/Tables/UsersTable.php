@@ -2,18 +2,21 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UsersTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['roles']))
             ->columns([
                 TextColumn::make('id')
                     ->label('编号')
@@ -23,6 +26,12 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('邮箱')
+                    ->searchable(),
+                TextColumn::make('role_names')
+                    ->label('角色')
+                    ->state(fn (User $record): string => $record->roles->pluck('name')->implode(', '))
+                    ->badge()
+                    ->separator(',')
                     ->searchable(),
                 TextColumn::make('email_verified_at')
                     ->label('邮箱验证')
