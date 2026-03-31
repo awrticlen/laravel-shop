@@ -213,6 +213,14 @@
                 var div = document.createElement('div');
                 div.innerHTML = html;
                 swal({ content: div, icon: 'error' });
+              } else if (error.response.status === 403) {
+                var msg =
+                  error.response &&
+                  error.response.data &&
+                  error.response.data.msg
+                    ? error.response.data.msg
+                    : '请求被拒绝';
+                swal(msg, '', 'error');
               } else {
                 swal('系统错误', '', 'error');
               }
