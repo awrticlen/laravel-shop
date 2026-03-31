@@ -18,6 +18,10 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
+    protected static ?string $modelLabel = '订单';
+
+    protected static ?string $pluralModelLabel = '订单';
+
     protected static ?string $navigationLabel = '订单';
 
     protected static string|\UnitEnum|null $navigationGroup = '订单管理';

@@ -18,6 +18,10 @@ class CouponCodeResource extends Resource
 {
     protected static ?string $model = CouponCode::class;
 
+    protected static ?string $modelLabel = '优惠券';
+
+    protected static ?string $pluralModelLabel = '优惠券';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     protected static ?string $navigationLabel = '优惠券';
 
