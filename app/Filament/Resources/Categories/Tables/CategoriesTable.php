@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
+use App\Models\Category;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -16,33 +15,30 @@ class CategoriesTable
     public static function configure(Table $table): Table
     {
         return $table
-        ->columns([
-            TextColumn::make('id')
-                ->label('ID')
-                ->sortable(),
-            TextColumn::make('name')
-                ->label('分类名称')
-                ->searchable()
-                ->sortable(),
-            TextColumn::make('slug')
-                ->label('别名')
-                ->searchable(),
-            ImageColumn::make('image')
-                ->label('图片'),
-            IconColumn::make('is_active')
-                ->label('启用')
-                ->boolean(),
-            TextColumn::make('created_at')
-                ->label('创建时间')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            TextColumn::make('updated_at')
-                ->label('更新时间')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-        ])
+            ->modifyQueryUsing(fn ($query) => $query->with('parent'))
+            ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->label('名称')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('level')
+                    ->label('层级')
+                    ->sortable(),
+                TextColumn::make('is_directory')
+                    ->label('是否目录')
+                    ->formatStateUsing(fn ($state): string => (bool) $state ? '是' : '否')
+                    ->badge()
+                    ->color(fn ($state): string => (bool) $state ? 'success' : 'gray'),
+                TextColumn::make('path')
+                    ->label('类目路径')
+                    ->searchable(),
+                TextColumn::make('parent.full_name')
+                    ->label('父类目')
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
             ->filters([
                 //
             ])

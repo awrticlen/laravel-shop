@@ -11,11 +11,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class OrderPolicy
 {
     use HandlesAuthorization;
-
-    public function own(AuthUser $authUser, Order $order): bool
-    {
-        return (int) $order->user_id === (int) $authUser->id;
-    }
     
     public function viewAny(AuthUser $authUser): bool
     {

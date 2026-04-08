@@ -19,18 +19,18 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
     protected static ?string $recordTitleAttribute = 'name';
 protected static ?int $navigationSort = 2;
-protected static ?string $navigationLabel = '分类';
+protected static ?string $navigationLabel = '商品类目';
 protected static string|\UnitEnum|null $navigationGroup = '商品管理';
 protected static bool $hasTitleCaseModelLabel = false;
 
 public static function getModelLabel(): string
 {
-    return '分类';
+    return '商品类目';
 }
 
 public static function getPluralModelLabel(): string
 {
-    return '分类';
+    return '商品类目';
 }
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     use HasFactory;
-protected $fillable = ['name', 'is_directory', 'level', 'path'];
+protected $fillable = ['name', 'parent_id', 'is_directory', 'level', 'path'];
     protected $casts = [
         'is_directory' => 'boolean',
     ];
