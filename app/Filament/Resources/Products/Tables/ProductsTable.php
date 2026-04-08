@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,13 +16,22 @@ class ProductsTable
     public static function configure(Table $table): Table
     {
         return $table
-    ->columns([
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('category'))
+            ->columns([
         TextColumn::make('id')
             ->label('ID')
             ->sortable(),
         TextColumn::make('title')
             ->label('商品名称')
             ->searchable(),
+        TextColumn::make('category.full_name')
+            ->label('类目')
+            ->placeholder('—')
+            ->searchable(query: function (Builder $query, string $search): Builder {
+                return $query->whereHas('category', function (Builder $q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            }),
         IconColumn::make('on_sale')
             ->label('已上架')
             ->boolean(),

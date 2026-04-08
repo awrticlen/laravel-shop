@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Models\Category;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
@@ -18,6 +20,22 @@ class ProductForm
             ->components([
                 Section::make('基本信息')
                     ->schema([
+                        Select::make('category_id')
+                            ->label('类目')
+                            ->searchable()
+                            ->preload()
+                            ->getSearchResultsUsing(fn (string $search): array => Category::query()
+                                ->where('is_directory', false)
+                                ->where('name', 'like', "%{$search}%")
+                                ->limit(20)
+                                ->get()
+                                ->mapWithKeys(fn (Category $category): array => [$category->id => $category->full_name])
+                                ->toArray())
+                            ->getOptionLabelUsing(fn ($value): ?string => $value
+                                ? Category::query()->find($value)?->full_name
+                                : null)
+                            ->helperText('仅选择叶子类目；可输入名称搜索')
+                            ->nullable(),
                         TextInput::make('title')
                             ->label('商品名称')
                             ->required(),
