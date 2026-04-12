@@ -25,6 +25,40 @@ body {
   margin-top: 0px;
 }
 
+/* 顶部「所有类目」多级下拉：原 .dropdown-submenu 教程样式，已改为 BS5 的 li.dropend，且限定在 #categoryTree 旁的一级菜单内，避免影响用户头像等其它下拉 */
+#categoryTree + ul.dropdown-menu {
+  > li.dropend {
+    position: relative;
+  }
+
+  li.dropend > .dropdown-toggle::after {
+    position: absolute;
+    right: 3px;
+    top: 40%;
+  }
+}
+
+@media (min-width: 992px) {
+  #categoryTree + ul.dropdown-menu li.dropend:hover > .dropdown-menu,
+  #categoryTree + ul.dropdown-menu li.dropend:focus-within > .dropdown-menu {
+    display: flex !important;
+    flex-direction: column;
+    position: absolute !important;
+    margin-top: -30px;
+    left: 100%;
+  }
+}
+
+@media (max-width: 992px) {
+  #categoryTree + ul.dropdown-menu {
+    width: 50%;
+  }
+
+  #categoryTree + ul.dropdown-menu li.dropend {
+    width: auto;
+  }
+}
+
 /* Sticky footer styles */
 html {
   position: relative;
