@@ -12,11 +12,14 @@ class ProductsController extends Controller
 {
     public function index(Request $request)
     {
+        $search = trim((string) $request->input('search', ''));
+        $order = (string) $request->input('order', '');
+
         // 创建一个查询构造器
         $builder = Product::query()->where('on_sale', true);
-        // 判断是否有提交 search 参数，如果有就赋值给 $search 变量
-        // search 参数用来模糊搜索商品
-        if ($search = $request->input('search', '')) {
+        $like = null;
+        // search 参数用来模糊搜索商品（已 trim，避免首尾空格导致搜不到）
+        if ($search !== '') {
             $like = '%'.$search.'%';
             // 模糊搜索商品标题、商品详情、SKU 标题、SKU描述
             $builder->where(function ($query) use ($like) {
@@ -42,17 +45,30 @@ class ProductsController extends Controller
                 $builder->where('category_id', $category->id);
             }
         }
-        // 是否有提交 order 参数，如果有就赋值给 $order 变量
         // order 参数用来控制商品的排序规则
-        if ($order = $request->input('order', '')) {
-            // 是否是以 _asc 或者 _desc 结尾
-            if (preg_match('/^(.+)_(asc|desc)$/', $order, $m)) {
-                // 如果字符串的开头是这 3 个字符串之一，说明是一个合法的排序值
-                if (in_array($m[1], ['price', 'sold_count', 'rating'])) {
-                    // 根据传入的排序值来构造排序参数
-                    $builder->orderBy($m[1], $m[2]);
-                }
+        $orderApplied = false;
+        if ($order !== '' && preg_match('/^(.+)_(asc|desc)$/', $order, $m)) {
+            if (in_array($m[1], ['price', 'sold_count', 'rating'], true)) {
+                $builder->orderBy($m[1], $m[2]);
+                $orderApplied = true;
             }
+        }
+
+        // 有搜索且用户未指定有效排序时，按与关键词的相关度排序（完全匹配标题优先）
+        if ($search !== '' && ! $orderApplied && $like !== null) {
+            $title = $builder->qualifyColumn('title');
+            $description = $builder->qualifyColumn('description');
+            $id = $builder->qualifyColumn('id');
+            $builder->orderByRaw(
+                'CASE
+                    WHEN '.$title.' = ? THEN 0
+                    WHEN '.$title.' LIKE ? THEN 1
+                    WHEN '.$title.' LIKE ? THEN 2
+                    WHEN '.$description.' LIKE ? THEN 3
+                    ELSE 4
+                END ASC, '.$id.' ASC',
+                [$search, $search.'%', $like, $like]
+            );
         }
 
         $products = $builder->paginate(16);
