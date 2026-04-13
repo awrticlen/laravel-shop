@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductResource extends Resource
 {
@@ -35,6 +36,16 @@ public static function getPluralModelLabel(): string
 {
     return '商品';
 }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where(function (Builder $query): void {
+                $query->where('type', Product::TYPE_NORMAL)
+                    ->orWhereNull('type')
+                    ->orWhere('type', '');
+            });
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -17,6 +17,7 @@ class ProductFactory extends Factory
         // 从数据库中随机取一个类目
         $category = \App\Models\Category::query()->where('is_directory', false)->inRandomOrder()->first();
         return [
+            'type'         => Product::TYPE_NORMAL,
             'title'        => $this->faker->word,
             'description'  => $this->faker->sentence,
             'image'        => $image,
