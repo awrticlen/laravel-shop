@@ -14,57 +14,57 @@ class CouponCodePolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:CouponCode');
+        return $authUser->can('ViewAny:CouponCodeResource');
     }
 
     public function view(AuthUser $authUser, CouponCode $couponCode): bool
     {
-        return $authUser->can('View:CouponCode');
+        return $authUser->can('View:CouponCodeResource');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:CouponCode');
+        return $authUser->can('Create:CouponCodeResource');
     }
 
     public function update(AuthUser $authUser, CouponCode $couponCode): bool
     {
-        return $authUser->can('Update:CouponCode');
+        return $authUser->can('Update:CouponCodeResource');
     }
 
     public function delete(AuthUser $authUser, CouponCode $couponCode): bool
     {
-        return $authUser->can('Delete:CouponCode');
+        return $authUser->can('Delete:CouponCodeResource');
     }
 
     public function restore(AuthUser $authUser, CouponCode $couponCode): bool
     {
-        return $authUser->can('Restore:CouponCode');
+        return $authUser->can('Restore:CouponCodeResource');
     }
 
     public function forceDelete(AuthUser $authUser, CouponCode $couponCode): bool
     {
-        return $authUser->can('ForceDelete:CouponCode');
+        return $authUser->can('ForceDelete:CouponCodeResource');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:CouponCode');
+        return $authUser->can('ForceDeleteAny:CouponCodeResource');
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:CouponCode');
+        return $authUser->can('RestoreAny:CouponCodeResource');
     }
 
     public function replicate(AuthUser $authUser, CouponCode $couponCode): bool
     {
-        return $authUser->can('Replicate:CouponCode');
+        return $authUser->can('Replicate:CouponCodeResource');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:CouponCode');
+        return $authUser->can('Reorder:CouponCodeResource');
     }
 
 }

@@ -14,57 +14,57 @@ class OrderPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:Order');
+        return $authUser->can('ViewAny:OrderResource');
     }
 
     public function view(AuthUser $authUser, Order $order): bool
     {
-        return $authUser->can('View:Order');
+        return $authUser->can('View:OrderResource');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:Order');
+        return $authUser->can('Create:OrderResource');
     }
 
     public function update(AuthUser $authUser, Order $order): bool
     {
-        return $authUser->can('Update:Order');
+        return $authUser->can('Update:OrderResource');
     }
 
     public function delete(AuthUser $authUser, Order $order): bool
     {
-        return $authUser->can('Delete:Order');
+        return $authUser->can('Delete:OrderResource');
     }
 
     public function restore(AuthUser $authUser, Order $order): bool
     {
-        return $authUser->can('Restore:Order');
+        return $authUser->can('Restore:OrderResource');
     }
 
     public function forceDelete(AuthUser $authUser, Order $order): bool
     {
-        return $authUser->can('ForceDelete:Order');
+        return $authUser->can('ForceDelete:OrderResource');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:Order');
+        return $authUser->can('ForceDeleteAny:OrderResource');
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:Order');
+        return $authUser->can('RestoreAny:OrderResource');
     }
 
     public function replicate(AuthUser $authUser, Order $order): bool
     {
-        return $authUser->can('Replicate:Order');
+        return $authUser->can('Replicate:OrderResource');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:Order');
+        return $authUser->can('Reorder:OrderResource');
     }
 
 }
