@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\Product;
+use App\Support\Products\SyncProductMinPrice;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateProduct extends CreateRecord
@@ -19,9 +20,6 @@ class CreateProduct extends CreateRecord
 
     public function afterCreate(): void
     {
-        $this->record->refresh();
-        $skus = $this->record->skus;
-        $minPrice = $skus->isEmpty() ? 0 : (float) $skus->min('price');
-        $this->record->updateQuietly(['price' => $minPrice]);
+        SyncProductMinPrice::run($this->record);
     }
 }

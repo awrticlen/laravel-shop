@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CrowdfundingProducts\Pages;
 
 use App\Filament\Resources\CrowdfundingProducts\CrowdfundingProductsResource;
+use App\Support\Products\SyncProductMinPrice;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCrowdfundingProduct extends EditRecord
@@ -53,9 +54,6 @@ class EditCrowdfundingProduct extends EditRecord
             );
         }
 
-        $this->record->refresh();
-        $skus = $this->record->skus;
-        $minPrice = $skus->isEmpty() ? 0 : (float) $skus->min('price');
-        $this->record->updateQuietly(['price' => $minPrice]);
+        SyncProductMinPrice::run($this->record);
     }
 }

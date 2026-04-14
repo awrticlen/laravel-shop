@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Support\Products\SyncProductMinPrice;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -19,9 +20,6 @@ class EditProduct extends EditRecord
 
     public function afterSave(): void
     {
-        $this->record->refresh();
-        $skus = $this->record->skus;
-        $minPrice = $skus->isEmpty() ? 0 : (float) $skus->min('price');
-        $this->record->updateQuietly(['price' => $minPrice]);
+        SyncProductMinPrice::run($this->record);
     }
 }
