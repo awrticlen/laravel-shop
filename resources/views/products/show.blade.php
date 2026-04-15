@@ -13,12 +13,44 @@
       </div>
       <div class="col-7">
         <div class="title">{{ $product->title }}</div>
-        <div class="price"><label>价格</label><em>￥</em><span>{{ $product->price }}</span></div>
-        <div class="sales_and_reviews">
-          <div class="sold_count">累计销量 <span class="count">{{ $product->sold_count }}</span></div>
-          <div class="review_count">累计评价 <span class="count">{{ $product->review_count }}</span></div>
-          <div class="rating" title="评分 {{ $product->rating }}">评分 <span class="count">{{ str_repeat('★', floor($product->rating)) }}{{ str_repeat('☆', 5 - floor($product->rating)) }}</span></div>
-        </div>
+        @if($product->type === \App\Models\Product::TYPE_CROWDFUNDING)
+          <div class="crowdfunding-info">
+            <div class="have-text">已筹到</div>
+            <div class="total-amount"><span class="symbol">￥</span>{{ $product->crowdfunding->total_amount }}</div>
+            <div class="progress">
+              <div
+                class="progress-bar progress-bar-striped"
+                role="progressbar"
+                aria-valuenow="{{ $product->crowdfunding->percent }}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                style="min-width: 1em; width: {{ min($product->crowdfunding->percent, 100) }}%">
+              </div>
+            </div>
+            <div class="progress-info">
+              <span class="current-progress">当前进度：{{ $product->crowdfunding->percent }}%</span>
+              <span class="float-end user-count">{{ $product->crowdfunding->user_count }}名支持者</span>
+            </div>
+            @if ($product->crowdfunding->status === \App\Models\CrowdfundingProduct::STATUS_FUNDING)
+              <div>
+                此项目必须在
+                <span class="text-danger">{{ $product->crowdfunding->end_at->format('Y-m-d H:i:s') }}</span>
+                前得到
+                <span class="text-danger">￥{{ $product->crowdfunding->target_amount }}</span>
+                的支持才可成功，筹款将在
+                <span class="text-danger">{{ $product->crowdfunding->end_at->diffForHumans(now()) }}</span>
+                结束！
+              </div>
+            @endif
+          </div>
+        @else
+          <div class="price"><label>价格</label><em>￥</em><span>{{ $product->price }}</span></div>
+          <div class="sales_and_reviews">
+            <div class="sold_count">累计销量 <span class="count">{{ $product->sold_count }}</span></div>
+            <div class="review_count">累计评价 <span class="count">{{ $product->review_count }}</span></div>
+            <div class="rating" title="评分 {{ $product->rating }}">评分 <span class="count">{{ str_repeat('★', floor($product->rating)) }}{{ str_repeat('☆', 5 - floor($product->rating)) }}</span></div>
+          </div>
+        @endif
         <div class="skus">
           <label>选择</label>
           <div class="btn-group btn-group-toggle">
@@ -42,7 +74,21 @@
           @else
             <button class="btn btn-success btn-favor">❤ 收藏</button>
           @endif
-          <button class="btn btn-primary btn-add-to-cart">加入购物车</button>
+          @if($product->type === \App\Models\Product::TYPE_CROWDFUNDING)
+            @auth
+              @if($product->crowdfunding->status === \App\Models\CrowdfundingProduct::STATUS_FUNDING)
+                <button class="btn btn-primary btn-crowdfunding">参与众筹</button>
+              @else
+                <button class="btn btn-primary" disabled>
+                  {{ \App\Models\CrowdfundingProduct::$statusMap[$product->crowdfunding->status] }}
+                </button>
+              @endif
+            @else
+              <a class="btn btn-primary" href="{{ route('login') }}">请先登录</a>
+            @endauth
+          @else
+            <button class="btn btn-primary btn-add-to-cart">加入购物车</button>
+          @endif
         </div>
       </div>
     </div>
@@ -96,16 +142,18 @@
 @section('scriptsAfterJs')
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      var isCrowdfunding = @json($product->type === \App\Models\Product::TYPE_CROWDFUNDING);
+      var addresses = @json(Auth::check() ? Auth::user()->addresses : []);
       var priceSpan = document.querySelector('.product-info .price span');
       var stockSpan = document.querySelector('.product-info .stock');
       var skuBtns = document.querySelectorAll('.sku-btn');
 
       function updatePriceStock(label) {
-        if (!label || !priceSpan || !stockSpan) return;
+        if (!label) return;
         var price = label.getAttribute('data-price');
         var stock = label.getAttribute('data-stock');
-        if (price != null) priceSpan.textContent = price;
-        if (stock != null) stockSpan.textContent = '库存：' + stock + '件';
+        if (price != null && priceSpan) priceSpan.textContent = price;
+        if (stock != null && stockSpan) stockSpan.textContent = '库存：' + stock + '件';
       }
 
       // Bootstrap 5 工具提示
@@ -245,6 +293,92 @@
               var msg = error.response.data && (error.response.data.msg || error.response.data.message);
               swal(msg || '系统错误', '', 'error');
             });
+        });
+      }
+
+      // 众筹下单：原生 JS + SweetAlert
+      var crowdfundingBtn = document.querySelector('.btn-crowdfunding');
+      if (isCrowdfunding && crowdfundingBtn && typeof axios !== 'undefined' && typeof swal !== 'undefined') {
+        crowdfundingBtn.addEventListener('click', function () {
+          var checkedSku = document.querySelector('input[name="skus"]:checked');
+          if (!checkedSku) {
+            swal('请先选择商品', '', 'warning');
+            return;
+          }
+          if (!Array.isArray(addresses) || addresses.length === 0) {
+            swal('请先添加收货地址', '', 'warning');
+            return;
+          }
+
+          var wrapper = document.createElement('div');
+          wrapper.innerHTML =
+            '<div class="mb-3">' +
+            '  <label class="form-label">选择地址</label>' +
+            '  <select class="form-select" name="address_id"></select>' +
+            '</div>' +
+            '<div class="mb-1">' +
+            '  <label class="form-label">购买数量</label>' +
+            '  <input class="form-control" name="amount" type="number" min="1" value="1">' +
+            '</div>';
+
+          var addressSelect = wrapper.querySelector('select[name="address_id"]');
+          addresses.forEach(function (address) {
+            var option = document.createElement('option');
+            option.value = address.id;
+            option.textContent = address.full_address + ' ' + address.contact_name + ' ' + address.contact_phone;
+            addressSelect.appendChild(option);
+          });
+
+          swal({
+            text: '参与众筹',
+            content: wrapper,
+            buttons: ['取消', '确定'],
+          }).then(function (confirmed) {
+            if (!confirmed) return;
+
+            var amountInput = wrapper.querySelector('input[name="amount"]');
+            var amount = amountInput ? parseInt(amountInput.value, 10) : 1;
+            if (!amount || amount < 1) {
+              swal('购买数量必须大于 0', '', 'warning');
+              return;
+            }
+
+            var req = {
+              address_id: addressSelect ? addressSelect.value : null,
+              amount: amount,
+              sku_id: checkedSku.value,
+            };
+
+            axios.post('{{ route('crowdfunding_orders.store') }}', req)
+              .then(function (response) {
+                swal('订单提交成功', '', 'success').then(function () {
+                  location.href = '/orders/' + response.data.id;
+                });
+              })
+              .catch(function (error) {
+                if (!error.response) {
+                  swal('系统错误', '', 'error');
+                  return;
+                }
+                if (error.response.status === 422 && error.response.data && error.response.data.errors) {
+                  var errors = error.response.data.errors;
+                  var html = '';
+                  Object.keys(errors).forEach(function (field) {
+                    errors[field].forEach(function (msg) {
+                      html += msg + '<br>';
+                    });
+                  });
+                  var div = document.createElement('div');
+                  div.innerHTML = html;
+                  swal({ content: div, icon: 'error' });
+                } else if (error.response.status === 403) {
+                  var msg = error.response.data && (error.response.data.msg || error.response.data.message);
+                  swal(msg || '请求被拒绝', '', 'error');
+                } else {
+                  swal('系统错误', '', 'error');
+                }
+              });
+          });
         });
       }
     });

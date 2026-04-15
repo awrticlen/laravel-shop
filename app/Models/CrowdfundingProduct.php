@@ -18,8 +18,9 @@ class CrowdfundingProduct extends Model
     ];
 
     protected $fillable = ['total_amount', 'target_amount', 'user_count', 'status', 'end_at'];
-    // end_at 会自动转为 Carbon 类型
-    protected $dates = ['end_at'];
+    protected $casts = [
+        'end_at' => 'datetime',
+    ];
     // 不需要 created_at 和 updated_at 字段
     public $timestamps = false;
 
