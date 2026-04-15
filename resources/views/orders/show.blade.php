@@ -106,8 +106,9 @@
             <button type="button" id="btn-receive" class="btn btn-sm btn-success">确认收货</button>
           </div>
           @endif
-        <!-- 订单已支付，且未申请退款或退款失败时展示申请退款按钮（支持二次申请） -->
+        <!-- 非众筹订单、已支付，且未申请退款或退款失败时展示申请退款按钮（支持二次申请） -->
         @if(
+          $order->type !== \App\Models\Order::TYPE_CROWDFUNDING &&
           $order->paid_at &&
           in_array($order->refund_status, [
             \App\Models\Order::REFUND_STATUS_PENDING,

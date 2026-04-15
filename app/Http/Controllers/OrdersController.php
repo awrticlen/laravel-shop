@@ -129,6 +129,10 @@ class OrdersController extends Controller
         if (!$order->paid_at) {
             throw new InvalidRequestException('该订单未支付，不可退款');
         }
+        // 众筹订单不允许申请退款
+        if ($order->type === Order::TYPE_CROWDFUNDING) {
+            throw new InvalidRequestException('众筹订单不支持退款');
+        }
         // 仅允许“未退款”或“退款失败”时申请（支持二次申请）
         if (! in_array($order->refund_status, [Order::REFUND_STATUS_PENDING, Order::REFUND_STATUS_FAILED], true)) {
             throw new InvalidRequestException('当前退款状态不可申请退款');

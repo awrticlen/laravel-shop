@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Exceptions\InternalException;
 use App\Exceptions\InvalidRequestException;
+use App\Models\CrowdfundingProduct;
 use App\Models\Order;
 use App\Services\OrderRefundService;
 use Filament\Actions\Action;
@@ -114,7 +115,11 @@ class OrderInfolist
                                     ->color('success')
                                     ->visible(fn ($record): bool => filled($record->paid_at)
                                         && $record->ship_status === Order::SHIP_STATUS_PENDING
-                                        && $record->refund_status !== Order::REFUND_STATUS_SUCCESS)
+                                        && $record->refund_status !== Order::REFUND_STATUS_SUCCESS
+                                        && (
+                                            $record->type !== Order::TYPE_CROWDFUNDING
+                                            || optional(optional($record->items->first())->product->crowdfunding)->status === CrowdfundingProduct::STATUS_SUCCESS
+                                        ))
                                     ->form([
                                         Select::make('express_company')
                                             ->label('物流公司')
@@ -132,6 +137,14 @@ class OrderInfolist
                                             ->maxLength(50),
                                     ])
                                     ->action(function ($record, array $data): void {
+                                        // 众筹订单仅允许在众筹成功后发货（后端兜底）
+                                        if (
+                                            $record->type === Order::TYPE_CROWDFUNDING
+                                            && optional(optional($record->items->first())->product->crowdfunding)->status !== CrowdfundingProduct::STATUS_SUCCESS
+                                        ) {
+                                            throw new InvalidRequestException('众筹订单只能在众筹成功之后发货');
+                                        }
+
                                         $record->update([
                                             'ship_status' => Order::SHIP_STATUS_DELIVERED,
                                             'ship_data' => [

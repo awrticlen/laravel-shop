@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\OrderPaid;
 use App\Events\OrderReviewed;
 use App\Listeners\SendOrderPaidMail;
+use App\Listeners\UpdateCrowdfundingProductProgress;
 use App\Listeners\UpdateProductRating;
 use App\Listeners\UpdateProductSoldCount;
 use Illuminate\Support\ServiceProvider;
@@ -57,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(OrderPaid::class, UpdateProductSoldCount::class);
         Event::listen(OrderPaid::class, SendOrderPaidMail::class);
+        Event::listen(OrderPaid::class, UpdateCrowdfundingProductProgress::class);
         Event::listen(OrderReviewed::class, UpdateProductRating::class);
         // 当 Laravel 渲染 products.index 和 products.show 模板时，就会使用 CategoryTreeComposer 这个来注入类目树变量
         // 同时 Laravel 还支持通配符，例如 products.* 即代表当渲染 products 目录下的模板时都执行这个 ViewComposer
