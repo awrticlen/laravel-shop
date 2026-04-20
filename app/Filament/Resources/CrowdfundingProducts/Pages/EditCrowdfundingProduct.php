@@ -52,6 +52,8 @@ class EditCrowdfundingProduct extends EditRecord
                     'end_at' => $this->pendingCrowdfunding['end_at'],
                 ]
             );
+            $this->record->load('crowdfunding');
+            $this->record->crowdfunding?->scheduleDelayedFinish();
         }
 
         SyncProductMinPrice::run($this->record);

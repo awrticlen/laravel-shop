@@ -12,6 +12,26 @@ use Yansongda\LaravelPay\Facades\Pay;
 class OrderRefundService
 {
     /**
+     * 众筹失败等平台自动退款：已支付且仍为「未退款」的订单。
+     */
+    public function refundPaidOrderPending(Order $order): void
+    {
+        if (! $order->paid_at) {
+            throw new InvalidRequestException('订单未支付，无法退款');
+        }
+
+        if ($order->refund_status !== Order::REFUND_STATUS_PENDING) {
+            return;
+        }
+
+        $extra = $order->extra ?: [];
+        unset($extra['refund_disagree_reason'], $extra['refund_failed_code']);
+        $order->update(['extra' => $extra]);
+
+        $this->refundByPaymentMethod($order->fresh());
+    }
+
+    /**
      * 管理员同意退款：清拒绝理由后按支付方式执行退款（支付宝走接口，微信预留）。
      */
     public function agreeRefund(Order $order): void

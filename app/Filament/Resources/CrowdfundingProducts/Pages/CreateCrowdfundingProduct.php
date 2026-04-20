@@ -38,6 +38,8 @@ class CreateCrowdfundingProduct extends CreateRecord
                 'user_count' => 0,
                 'status' => CrowdfundingProduct::STATUS_FUNDING,
             ]);
+            $this->record->load('crowdfunding');
+            $this->record->crowdfunding?->scheduleDelayedFinish();
         }
 
         SyncProductMinPrice::run($this->record);

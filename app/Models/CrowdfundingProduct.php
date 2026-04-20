@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\FinishCrowdfundingJob;
 use Illuminate\Database\Eloquent\Model;
 
 class CrowdfundingProduct extends Model
@@ -17,7 +18,7 @@ class CrowdfundingProduct extends Model
         self::STATUS_FAIL    => '众筹失败',
     ];
 
-    protected $fillable = ['total_amount', 'target_amount', 'user_count', 'status', 'end_at'];
+    protected $fillable = ['total_amount', 'target_amount', 'user_count', 'status', 'end_at', 'finish_schedule_version'];
     protected $casts = [
         'end_at' => 'datetime',
     ];
@@ -27,6 +28,24 @@ class CrowdfundingProduct extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * 在创建或修改结束时间后调用：递增版本并投递在 end_at 执行的延迟任务；旧任务因版本不匹配会安全退出。
+     */
+    public function scheduleDelayedFinish(): void
+    {
+        if ($this->status !== self::STATUS_FUNDING) {
+            return;
+        }
+
+        $this->increment('finish_schedule_version');
+        $this->refresh();
+
+        $seconds = max(0, $this->end_at->getTimestamp() - now()->getTimestamp());
+
+        FinishCrowdfundingJob::dispatch($this->getKey(), (int) $this->finish_schedule_version)
+            ->delay(now()->addSeconds($seconds));
     }
 
     // 定义一个名为 percent 的访问器，返回当前众筹进度
