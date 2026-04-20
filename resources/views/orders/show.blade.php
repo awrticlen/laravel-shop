@@ -54,7 +54,19 @@
         @if($order->ship_data)
         <div class="line">
           <div class="line-label">物流信息：</div>
-          <div class="line-value">{{ $order->ship_data['express_company'] }} {{ $order->ship_data['express_no'] }}</div>
+          <div class="line-value">
+            {{
+              [
+                'SF' => '顺丰',
+                'YTO' => '圆通',
+                'ZTO' => '中通',
+                'YD' => '韵达',
+                'STO' => '申通',
+              ][$order->ship_data['express_company'] ?? '']
+              ?? ($order->ship_data['express_company'] ?? '-')
+            }}
+            {{ $order->ship_data['express_no'] ?? '-' }}
+          </div>
         </div>
         @endif
         <!-- 订单已支付，且退款状态不是未退款时展示退款信息 -->
