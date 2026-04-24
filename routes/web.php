@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CouponCodesController;
+use App\Http\Controllers\InstallmentsController;
 
 // 无 symlink 时通过路由提供 storage 文件（避免 /storage 被 nginx 直接 403，改用 serve-storage）
 Route::get('serve-storage/{path}', function (string $path) {
@@ -54,6 +55,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('crowdfunding_orders', [OrdersController::class, 'crowdfunding'])->name('crowdfunding_orders.store');
     Route::get('coupon_codes/{code}', [CouponCodesController::class, 'show'])->name('coupon_codes.show');
     Route::post('payment/{order}/installment', [PaymentController::class, 'payByInstallment'])->name('payment.installment');
+    Route::get('installments', [InstallmentsController::class, 'index'])->name('installments.index');
 });
 // 前端回调路由不放到 auth 组中，避免跨域名回跳时因未登录态被中间件拦截
     Route::get('payment/alipay/return', [PaymentController::class, 'alipayReturn'])->name('payment.alipay.return');
