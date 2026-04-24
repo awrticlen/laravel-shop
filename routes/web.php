@@ -56,6 +56,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::get('coupon_codes/{code}', [CouponCodesController::class, 'show'])->name('coupon_codes.show');
     Route::post('payment/{order}/installment', [PaymentController::class, 'payByInstallment'])->name('payment.installment');
     Route::get('installments', [InstallmentsController::class, 'index'])->name('installments.index');
+    Route::get('installments/{installment}', [InstallmentsController::class, 'show'])->name('installments.show');
 });
 // 前端回调路由不放到 auth 组中，避免跨域名回跳时因未登录态被中间件拦截
     Route::get('payment/alipay/return', [PaymentController::class, 'alipayReturn'])->name('payment.alipay.return');

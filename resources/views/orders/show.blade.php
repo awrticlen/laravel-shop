@@ -368,8 +368,11 @@ document.addEventListener('DOMContentLoaded', function () {
           if (installmentModal) {
             installmentModal.hide();
           }
-          // 项目尚未接入分期详情页面，先给出结果提示
-          alert('分期创建成功，分期编号：' + installment.no);
+          if (installment && installment.id) {
+            location.href = '/installments/' + installment.id;
+            return;
+          }
+          alert('分期创建成功，但未拿到分期ID');
         } catch (e) {
           alert('网络异常，请稍后重试');
         }
