@@ -135,6 +135,12 @@
         @if(!$order->paid_at && !$order->closed)
         <div class="payment-buttons">
           <a class="btn btn-primary btn-sm" href="{{ route('payment.alipay', ['order' => $order->id]) }}">支付宝支付</a>
+          <!-- 分期支付按钮开始 -->
+          <!-- 仅当订单总金额大等于分期最低金额时才展示分期按钮 -->
+          @if ($order->total_amount >= config('app.min_installment_amount'))
+          <button class="btn btn-sm btn-danger" id='btn-installment'>分期付款</button>
+          @endif
+          <!-- 分期支付按钮结束 -->
         </div>
         @endif
         <!-- 支付按钮结束 -->
@@ -144,6 +150,43 @@
 </div>
 </div>
 </div>
+<!-- 分期弹框开始（Bootstrap 5） -->
+<div class="modal fade" id="installment-modal" tabindex="-1" aria-labelledby="installment-modal-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="installment-modal-title">选择分期期数</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-striped text-center align-middle mb-0">
+          <thead>
+          <tr>
+            <th class="text-center">期数</th>
+            <th class="text-center">费率</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          @foreach(config('app.installment_fee_rate') as $count => $rate)
+            <tr>
+              <td>{{ $count }}期</td>
+              <td>{{ $rate }}%</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-primary btn-select-installment" data-count="{{ $count }}">选择</button>
+              </td>
+            </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 分期弹框结束 -->
 @endsection
 
 @section('scriptsAfterJs')
@@ -273,6 +316,63 @@ document.addEventListener('DOMContentLoaded', function () {
         location.reload();
       }).catch(function () {
         alert('网络异常，请稍后重试');
+      });
+    });
+  }
+
+  const installmentBtn = document.getElementById('btn-installment');
+  const installmentModalElement = document.getElementById('installment-modal');
+  const installmentModal = installmentModalElement && window.bootstrap
+    ? new window.bootstrap.Modal(installmentModalElement)
+    : null;
+
+  if (installmentBtn && installmentModal) {
+    installmentBtn.addEventListener('click', function () {
+      installmentModal.show();
+    });
+  }
+
+  const selectInstallmentButtons = document.querySelectorAll('.btn-select-installment');
+  if (selectInstallmentButtons.length > 0) {
+    selectInstallmentButtons.forEach(function (button) {
+      button.addEventListener('click', async function () {
+        const count = Number(this.dataset.count || 0);
+        if (!count) {
+          alert('分期期数不正确');
+          return;
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const url = @json(route('payment.installment', ['order' => $order->id]));
+
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-CSRF-TOKEN': csrfToken ?? '',
+            },
+            body: JSON.stringify({ count }),
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json().catch(function () { return null; });
+            const message = errorData?.message || '创建分期失败，请稍后重试';
+            alert(message);
+            return;
+          }
+
+          const installment = await res.json();
+          if (installmentModal) {
+            installmentModal.hide();
+          }
+          // 项目尚未接入分期详情页面，先给出结果提示
+          alert('分期创建成功，分期编号：' + installment.no);
+        } catch (e) {
+          alert('网络异常，请稍后重试');
+        }
       });
     });
   }
