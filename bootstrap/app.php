@@ -13,7 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->validateCsrfTokens(except: [
+            'payment/alipay/notify',
+            'installments/alipay/notify',
+        ]);
     })->withExceptions(function (Exceptions $exceptions): void {
         // 用户触发的业务异常：不写入日志，避免刷屏
         $exceptions->dontReport([
