@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Exceptions\InvalidRequestException;
 use App\Events\OrderPaid;
 use Carbon\Carbon;
+use Yansongda\LaravelPay\Facades\Pay;
+use Yansongda\Pay\Pay as YansongdaPay;
 
 class InstallmentsController extends Controller
 {
@@ -43,24 +45,35 @@ class InstallmentsController extends Controller
             throw new InvalidRequestException('该分期订单已结清');
         }
 
-        // 调用支付宝的网页支付
-        return Pay::alipay()->web([
+        $config = config('pay');
+        $config['alipay']['default']['notify_url'] = ngrok_url('installments.alipay.notify');
+        $config['alipay']['default']['return_url'] = ngrok_url('installments.alipay.return');
+
+        // 调用分期专用的支付宝网页支付，避免复用普通订单支付的全局回调地址
+        return YansongdaPay::alipay($config)->web([
             // 支付订单号使用分期流水号+还款计划编号
             'out_trade_no' => $installment->no.'_'.$nextItem->sequence,
             'total_amount' => $nextItem->total,
             'subject'      => '支付 Laravel Shop 的分期订单：'.$installment->no,
-            // 这里的 notify_url 和 return_url 可以覆盖掉在 AppServiceProvider 设置的回调地址
-            'notify_url'   => ngrok_url('installments.alipay.notify'),
-            'return_url'   => route('installments.alipay.return'),
         ]);
     }
     // 支付宝前端回调
     public function alipayReturn()
     {
         try {
-            Pay::alipay()->verify();
+            $data = Pay::alipay()->callback();
         } catch (\Exception $e) {
             return view('pages.error', ['msg' => '数据不正确']);
+        }
+
+        $outTradeNo = (string) ($data->out_trade_no ?? '');
+        $no = $outTradeNo !== '' ? explode('_', $outTradeNo, 2)[0] : '';
+
+        if ($no !== '' && ($installment = Installment::query()->where('no', $no)->first())) {
+            $base = rtrim((string) config('app.url'), '/');
+            $target = $base.'/installments/'.$installment->getKey();
+
+            return redirect()->away($target);
         }
 
         return view('pages.success', ['msg' => '付款成功']);
@@ -70,7 +83,7 @@ class InstallmentsController extends Controller
     public function alipayNotify()
     {
         // 校验支付宝回调参数是否正确
-        $data = Pay::alipay()->verify();
+        $data = Pay::alipay()->callback();
         // 如果订单状态不是成功或者结束，则不走后续的逻辑
         if (!in_array($data->trade_status, ['TRADE_SUCCESS', 'TRADE_FINISHED'])) {
             return Pay::alipay()->success();
