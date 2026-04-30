@@ -6,7 +6,7 @@ use App\Exceptions\InternalException;
 use App\Exceptions\InvalidRequestException;
 use App\Models\CrowdfundingProduct;
 use App\Models\Order;
-use App\Services\OrderRefundService;
+use App\Services\OrderService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -39,6 +39,12 @@ class OrderInfolist
                             ->placeholder('-'),
                         TextEntry::make('payment_method')
                             ->label('支付方式')
+                            ->formatStateUsing(fn (?string $state): string => match ($state) {
+                                'alipay' => '支付宝',
+                                'wechat' => '微信',
+                                'installment' => '分期付款',
+                                default => (string) $state,
+                            })
                             ->placeholder('-'),
                         TextEntry::make('payment_no')
                             ->label('支付渠道单号')
@@ -190,7 +196,7 @@ class OrderInfolist
                                     ->requiresConfirmation()
                                     ->action(function ($record): void {
                                         try {
-                                            app(OrderRefundService::class)->agreeRefund($record);
+                                            app(OrderService::class)->refundOrder($record);
                                         } catch (InvalidRequestException | InternalException $e) {
                                             Notification::make()
                                                 ->title('退款未成功')
@@ -248,6 +254,10 @@ class OrderInfolist
                             ]),
                         TextEntry::make('refund_no')
                             ->label('退款单号')
+                            ->placeholder('-'),
+                        TextEntry::make('refund_reason')
+                            ->label('退款理由')
+                            ->state(fn ($record): string => (string) ($record->extra['refund_reason'] ?? '-'))
                             ->placeholder('-'),
                     ])
                     ->columns(2),

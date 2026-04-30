@@ -31,6 +31,12 @@ class OrdersTable
                     ->toggleable(),
                 TextColumn::make('payment_method')
                     ->label('支付方式')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'alipay' => '支付宝',
+                        'wechat' => '微信',
+                        'installment' => '分期付款',
+                        default => (string) $state,
+                    })
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('payment_no')

@@ -11,6 +11,7 @@ use App\Jobs\CloseOrder;
 use Carbon\Carbon;
 use App\Models\CouponCode;
 use App\Exceptions\CouponCodeUnavailableException;
+use App\Jobs\RefundInstallmentOrder;
 
 class OrderService
 {
@@ -132,5 +133,32 @@ class OrderService
         dispatch(new CloseOrder($order, min(config('app.order_ttl'), $crowdfundingTtl)));
 
         return $order;
+    }
+
+    /**
+     * 统一退款入口：根据支付方式分发到同步退款或分期异步退款。
+     */
+    public function refundOrder(Order $order): void
+    {
+        if (! $order->paid_at) {
+            throw new InvalidRequestException('订单未支付，无法退款');
+        }
+
+        if ($order->refund_status !== Order::REFUND_STATUS_APPLIED) {
+            throw new InvalidRequestException('订单状态不正确');
+        }
+
+        if ($order->payment_method === 'installment') {
+            $order->update([
+                'refund_no' => Order::getAvailableRefundNo(),
+                'refund_status' => Order::REFUND_STATUS_PROCESSING,
+            ]);
+
+            dispatch(new RefundInstallmentOrder($order));
+
+            return;
+        }
+
+        app(OrderRefundService::class)->agreeRefund($order);
     }
 }
