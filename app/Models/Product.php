@@ -67,5 +67,9 @@ class Product extends Model
     public function crowdfunding()
     {
         return $this->hasOne(CrowdfundingProduct::class);
+    }   
+    public function properties()
+    {
+        return $this->hasMany(ProductProperty::class);
     }
 }

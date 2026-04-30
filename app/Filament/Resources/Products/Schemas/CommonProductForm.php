@@ -118,6 +118,24 @@ class CommonProductForm
                             ->collapsible()
                             ->columnSpanFull(),
                     ]),
+                Section::make('商品属性')
+                    ->schema([
+                        Repeater::make('properties')
+                            ->relationship()
+                            ->label('商品属性')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('属性名')
+                                    ->required(),
+                                TextInput::make('value')
+                                    ->label('属性值')
+                                    ->required(),
+                            ])
+                            ->addActionLabel('添加属性')
+                            ->columns(2)
+                            ->collapsible()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }
