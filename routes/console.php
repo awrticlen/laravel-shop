@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('crowdfunding:finish-due')->everyMinute();
+// 每天凌晨计算一次分期逾期费
+Schedule::command('cron:calculate-installment-fine')->daily();
