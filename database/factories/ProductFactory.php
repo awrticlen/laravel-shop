@@ -19,6 +19,7 @@ class ProductFactory extends Factory
         return [
             'type'         => Product::TYPE_NORMAL,
             'title'        => $this->faker->word,
+            'long_title'   => $this->faker->sentence,
             'description'  => $this->faker->sentence,
             'image'        => $image,
             'on_sale'      => true,

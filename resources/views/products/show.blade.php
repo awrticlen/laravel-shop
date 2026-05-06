@@ -12,7 +12,7 @@
         <img class="cover" src="{{ $product->image_url ?: 'https://picsum.photos/seed/'.$product->id.'/400/400' }}" alt="{{ $product->title }}" onerror="this.src='https://picsum.photos/seed/{{ $product->id }}/400/400'">
       </div>
       <div class="col-7">
-        <div class="title">{{ $product->title }}</div>
+        <div class="title">{{ $product->long_title ?: $product->title }}</div>
         @if($product->type === \App\Models\Product::TYPE_CROWDFUNDING)
           <div class="crowdfunding-info">
             <div class="have-text">已筹到</div>

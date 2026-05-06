@@ -24,6 +24,7 @@ class Product extends Model
     protected $fillable = [
         'category_id',
         'title',
+        'long_title', // 添加 long_title 到 $fillable 属性中
         'description',
         'image',
         'on_sale',

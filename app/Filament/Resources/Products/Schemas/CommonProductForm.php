@@ -42,6 +42,10 @@ class CommonProductForm
             TextInput::make('title')
                 ->label('商品名称')
                 ->required(),
+            TextInput::make('long_title')
+                ->label('商品长标题')
+                ->required()
+                ->columnSpanFull(),
             Textarea::make('description')
                 ->label('商品描述')
                 ->required()
