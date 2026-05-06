@@ -53,7 +53,7 @@
         @endif
         <div class="skus">
           <label>选择</label>
-          <div class="btn-group btn-group-toggle">
+          <div class="btn-group" role="group" aria-label="选择 SKU">
             @foreach($product->skus as $sku)
               <label
                 class="btn sku-btn"
@@ -94,27 +94,40 @@
     </div>
     <div class="product-detail">
       <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" href="#product-detail-tab" aria-controls="product-detail-tab" role="tab" data-bs-toggle="tab" aria-selected="true">商品详情</a>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="product-detail-tab-link" href="#product-detail-tab" data-bs-toggle="tab" data-bs-target="#product-detail-tab" role="tab" aria-controls="product-detail-tab" aria-selected="true">商品详情</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#product-reviews-tab" aria-controls="product-reviews-tab" role="tab" data-bs-toggle="tab" aria-selected="false">用户评价</a>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="product-reviews-tab-link" href="#product-reviews-tab" data-bs-toggle="tab" data-bs-target="#product-reviews-tab" role="tab" aria-controls="product-reviews-tab" aria-selected="false">用户评价</a>
         </li>
       </ul>
       <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="product-detail-tab">
-          {!! $product->description !!}
+        <div role="tabpanel" class="tab-pane fade show active" id="product-detail-tab" aria-labelledby="product-detail-tab-link">
+           <!-- 产品属性开始 -->
+           <div class="properties-list">
+            <div class="properties-list-title">产品参数：</div>
+            <ul class="properties-list-body">
+            @foreach($product->grouped_properties as $name => $values)
+                <li>{{ $name }}：{{ join(' ', $values) }}</li>
+              @endforeach
+            </ul>
+          </div>
+          <!-- 产品属性结束 -->
+          <!-- 在商品描述外面包了一层 div -->
+          <div class="product-description">
+            {!! $product->description !!}
+          </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="product-reviews-tab">
+        <div role="tabpanel" class="tab-pane fade" id="product-reviews-tab" aria-labelledby="product-reviews-tab-link">
                   <!-- 评论列表开始 -->
           <table class="table table-bordered table-striped">
             <thead>
             <tr>
-              <td>用户</td>
-              <td>商品</td>
-              <td>评分</td>
-              <td>评价</td>
-              <td>时间</td>
+              <th scope="col">用户</th>
+              <th scope="col">商品</th>
+              <th scope="col">评分</th>
+              <th scope="col">评价</th>
+              <th scope="col">时间</th>
             </tr>
             </thead>
             <tbody>
@@ -187,7 +200,7 @@
       // 保持选中按钮的 active 样式，并同步价格/库存
       document.querySelectorAll('input[name="skus"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
-          document.querySelectorAll('.btn-group-toggle .sku-btn').forEach(function (l) { l.classList.remove('active'); });
+          document.querySelectorAll('.btn-group .sku-btn').forEach(function (l) { l.classList.remove('active'); });
           var label = this.closest('label');
           if (label) label.classList.add('active');
           updatePriceStock(label);
