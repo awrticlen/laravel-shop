@@ -6,6 +6,7 @@ use App\Filament\Resources\CrowdfundingProducts\CrowdfundingProductsResource;
 use App\Models\CrowdfundingProduct;
 use App\Models\Product;
 use App\Support\Products\SyncProductMinPrice;
+use App\Support\Products\SyncProductToElasticsearch;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateCrowdfundingProduct extends CreateRecord
@@ -43,5 +44,6 @@ class CreateCrowdfundingProduct extends CreateRecord
         }
 
         SyncProductMinPrice::run($this->record);
+        SyncProductToElasticsearch::run($this->record);
     }
 }

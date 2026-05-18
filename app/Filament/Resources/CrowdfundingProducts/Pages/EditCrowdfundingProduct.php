@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CrowdfundingProducts\Pages;
 
 use App\Filament\Resources\CrowdfundingProducts\CrowdfundingProductsResource;
 use App\Support\Products\SyncProductMinPrice;
+use App\Support\Products\SyncProductToElasticsearch;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCrowdfundingProduct extends EditRecord
@@ -57,5 +58,6 @@ class EditCrowdfundingProduct extends EditRecord
         }
 
         SyncProductMinPrice::run($this->record);
+        SyncProductToElasticsearch::run($this->record);
     }
 }

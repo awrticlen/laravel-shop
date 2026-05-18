@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Products\Pages;
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\Product;
 use App\Support\Products\SyncProductMinPrice;
+use App\Support\Products\SyncProductToElasticsearch;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateProduct extends CreateRecord
@@ -21,5 +22,6 @@ class CreateProduct extends CreateRecord
     public function afterCreate(): void
     {
         SyncProductMinPrice::run($this->record);
+        SyncProductToElasticsearch::run($this->record);
     }
 }
