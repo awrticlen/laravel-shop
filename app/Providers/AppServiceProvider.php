@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Product;
+use App\Observers\ProductObserver;
 use App\Events\OrderPaid;
 use App\Events\OrderReviewed;
 use App\Listeners\SendOrderPaidMail;
@@ -68,6 +70,8 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         \Illuminate\Pagination\Paginator::useBootstrap();
+
+        Product::observe(ProductObserver::class);
 
         Event::listen(OrderPaid::class, UpdateProductSoldCount::class);
         Event::listen(OrderPaid::class, SendOrderPaidMail::class);
