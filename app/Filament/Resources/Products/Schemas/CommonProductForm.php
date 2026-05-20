@@ -56,7 +56,8 @@ class CommonProductForm
                 ->disk('public')
                 ->directory('products')
                 ->visibility('public')
-                ->required(),
+                ->required(fn (string $operation): bool => $operation === 'create')
+                ->dehydrated(fn ($state) => filled($state)),
             Radio::make('on_sale')
                 ->label('上架')
                 ->options(['1' => '是', '0' => '否'])
@@ -82,14 +83,19 @@ class CommonProductForm
         }
 
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('基本信息')
+                    ->description('商品展示与上架信息')
                     ->schema([
                         ...$baseFields,
                         ...$extraBasicFields,
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->compact(),
                 Section::make('商品 SKU')
+                    ->description('规格、价格与库存')
                     ->schema([
                         Repeater::make('skus')
                             ->relationship()
@@ -118,11 +124,13 @@ class CommonProductForm
                             ->minItems(1)
                             ->defaultItems(1)
                             ->addActionLabel('添加 SKU')
-                            ->columns(2)
-                            ->collapsible()
+                            ->columns(4)
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->columnSpanFull()
+                    ->compact(),
                 Section::make('商品属性')
+                    ->description('用于前台筛选的参数')
                     ->schema([
                         Repeater::make('properties')
                             ->relationship()
@@ -137,9 +145,10 @@ class CommonProductForm
                             ])
                             ->addActionLabel('添加属性')
                             ->columns(2)
-                            ->collapsible()
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->columnSpanFull()
+                    ->compact(),
             ]);
     }
 }

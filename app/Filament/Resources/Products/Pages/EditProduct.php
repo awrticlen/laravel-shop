@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Models\Product;
 use App\Support\Products\SyncProductMinPrice;
 use App\Support\Products\SyncProductToElasticsearch;
 use Filament\Actions\DeleteAction;
@@ -17,6 +18,17 @@ class EditProduct extends EditRecord
         return [
             DeleteAction::make()->label('删除'),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (blank($data['image'] ?? null)) {
+            $data['image'] = $this->record->image;
+        }
+
+        $data['type'] = $data['type'] ?? $this->record->type ?? Product::TYPE_NORMAL;
+
+        return $data;
     }
 
     public function afterSave(): void

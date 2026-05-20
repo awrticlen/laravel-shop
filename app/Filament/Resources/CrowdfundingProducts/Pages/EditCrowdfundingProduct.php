@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CrowdfundingProducts\Pages;
 
 use App\Filament\Resources\CrowdfundingProducts\CrowdfundingProductsResource;
+use App\Models\Product;
 use App\Support\Products\SyncProductMinPrice;
 use App\Support\Products\SyncProductToElasticsearch;
 use Filament\Resources\Pages\EditRecord;
@@ -37,6 +38,12 @@ class EditCrowdfundingProduct extends EditRecord
             'end_at' => $data['cf_end_at'] ?? null,
         ];
         unset($data['cf_target_amount'], $data['cf_end_at']);
+
+        if (blank($data['image'] ?? null)) {
+            $data['image'] = $this->record->image;
+        }
+
+        $data['type'] = $data['type'] ?? $this->record->type ?? Product::TYPE_CROWDFUNDING;
 
         return $data;
     }
