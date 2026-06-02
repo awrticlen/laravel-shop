@@ -104,6 +104,8 @@ class ProductsController extends Controller
             throw new InvalidRequestException('商品未上架');
         }
 
+        $product->loadMissing(['skus', 'properties', 'category', 'crowdfunding', 'seckill']);
+
         $favored = false;
         // 用户未登录时返回的是 null，已登录时返回的是对应的用户对象
         if ($user = $request->user()) {

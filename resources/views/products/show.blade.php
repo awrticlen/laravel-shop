@@ -83,6 +83,18 @@
                     @else
                       <a class="btn btn-primary" href="{{ route('login') }}">请先登录</a>
                     @endauth
+                  @elseif ($product->type === \App\Models\Product::TYPE_SECKILL)
+                    @auth
+                      @if ($product->seckill->is_before_start)
+                        <button class="btn btn-primary btn-seckill disabled countdown">抢购倒计时</button>
+                      @elseif ($product->seckill->is_after_end)
+                        <button class="btn btn-primary btn-seckill disabled">抢购已结束</button>
+                      @else
+                        <button class="btn btn-primary btn-seckill">立即抢购</button>
+                      @endif
+                    @else
+                      <a class="btn btn-primary" href="{{ route('login') }}">请先登录</a>
+                    @endauth
                   @else
                     <button class="btn btn-primary btn-add-to-cart">加入购物车</button>
                   @endif
@@ -183,9 +195,16 @@
 @endsection
 
 @section('scriptsAfterJs')
+  @if ($product->type === \App\Models\Product::TYPE_SECKILL && $product->seckill->is_before_start)
+    <script>
+      window.__seckillStartAt = {{ $product->seckill->start_at->getTimestamp() }};
+    </script>
+  @endif
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var isCrowdfunding = @json($product->type === \App\Models\Product::TYPE_CROWDFUNDING);
+      var isSeckill = @json($product->type === \App\Models\Product::TYPE_SECKILL);
+      var seckillBeforeStart = @json($product->type === \App\Models\Product::TYPE_SECKILL && $product->seckill->is_before_start);
       var addresses = @json(Auth::check() ? Auth::user()->addresses : []);
       var priceSpan = document.querySelector('.product-info .price span');
       var stockSpan = document.querySelector('.product-info .stock');
@@ -401,6 +420,120 @@
             };
 
             axios.post('{{ route('crowdfunding_orders.store') }}', req)
+              .then(function(response) {
+                swal('订单提交成功', '', 'success').then(function() {
+                  location.href = '/orders/' + response.data.id;
+                });
+              })
+              .catch(function(error) {
+                if (!error.response) {
+                  swal('系统错误', '', 'error');
+                  return;
+                }
+                if (error.response.status === 422 && error.response.data && error.response.data.errors) {
+                  var errors = error.response.data.errors;
+                  var html = '';
+                  Object.keys(errors).forEach(function(field) {
+                    errors[field].forEach(function(msg) {
+                      html += msg + '<br>';
+                    });
+                  });
+                  var div = document.createElement('div');
+                  div.innerHTML = html;
+                  swal({
+                    content: div,
+                    icon: 'error'
+                  });
+                } else if (error.response.status === 403) {
+                  var msg = error.response.data && (error.response.data.msg || error.response.data.message);
+                  swal(msg || '请求被拒绝', '', 'error');
+                } else {
+                  swal('系统错误', '', 'error');
+                }
+              });
+          });
+        });
+      }
+
+      // 秒杀倒计时（原生 Date，无需 moment.js）
+      if (isSeckill && seckillBeforeStart && typeof window.__seckillStartAt === 'number') {
+        var seckillBtn = document.querySelector('.btn-seckill');
+        var startTimeMs = window.__seckillStartAt * 1000;
+
+        function padTwo(n) {
+          return String(n).padStart(2, '0');
+        }
+
+        var countdownTimer = setInterval(function() {
+          var now = Date.now();
+          if (now >= startTimeMs) {
+            if (seckillBtn) {
+              seckillBtn.classList.remove('disabled', 'countdown');
+              seckillBtn.textContent = '立即抢购';
+            }
+            clearInterval(countdownTimer);
+            return;
+          }
+
+          var diffSec = Math.floor((startTimeMs - now) / 1000);
+          var hourDiff = Math.floor(diffSec / 3600);
+          var minDiff = Math.floor((diffSec % 3600) / 60);
+          var secDiff = diffSec % 60;
+          if (seckillBtn) {
+            seckillBtn.textContent = '抢购倒计时 ' + padTwo(hourDiff) + ':' + padTwo(minDiff) + ':' + padTwo(secDiff);
+          }
+        }, 500);
+      }
+
+      // 秒杀下单
+      var seckillBtn = document.querySelector('.btn-seckill');
+      if (isSeckill && seckillBtn && typeof axios !== 'undefined' && typeof swal !== 'undefined') {
+        seckillBtn.addEventListener('click', function() {
+          if (this.classList.contains('disabled')) {
+            return;
+          }
+
+          var checkedSku = document.querySelector('input[name="skus"]:checked');
+          if (!checkedSku) {
+            swal('请先选择商品', '', 'warning');
+            return;
+          }
+
+          if (!Array.isArray(addresses) || addresses.length === 0) {
+            swal('请先添加收货地址', '', 'warning');
+            return;
+          }
+
+          var wrapper = document.createElement('div');
+          wrapper.innerHTML =
+            '<div class="mb-3">' +
+            '  <label class="form-label">选择收货地址</label>' +
+            '  <select class="form-select" name="address_id"></select>' +
+            '</div>';
+
+          var addressSelect = wrapper.querySelector('select[name="address_id"]');
+          addresses.forEach(function(address) {
+            var option = document.createElement('option');
+            option.value = address.id;
+            option.textContent = address.full_address + ' ' + address.contact_name + ' ' + address.contact_phone;
+            addressSelect.appendChild(option);
+          });
+
+          swal({
+            text: '选择收货地址',
+            content: wrapper,
+            buttons: ['取消', '确定'],
+          }).then(function(confirmed) {
+            if (!confirmed) {
+              return;
+            }
+
+            var req = {
+              address_id: addressSelect ? addressSelect.value : null,
+              sku_id: checkedSku.value,
+            };
+
+            axios.post('{{ route('seckill_orders.store') }}', req)
               .then(function(response) {
                 swal('订单提交成功', '', 'success').then(function() {
                   location.href = '/orders/' + response.data.id;
