@@ -21,7 +21,9 @@ Route::get('serve-storage/{path}', function (string $path) {
     return response()->file($fullPath);
 })->where('path', '.*')->name('storage.serve');
 
-Route::post('seckill_orders', [OrdersController::class, 'seckill'])->name('seckill_orders.store');
+Route::post('seckill_orders', [OrdersController::class, 'seckill'])
+    ->middleware('random_drop:80')
+    ->name('seckill_orders.store');
 
 Route::redirect('/', '/products')->name('root');
 Route::get('products', [ProductsController::class, 'index'])->name('products.index');
