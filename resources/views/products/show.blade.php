@@ -528,8 +528,29 @@
               return;
             }
 
+            var addressId = addressSelect ? parseInt(addressSelect.value, 10) : NaN;
+            var address = null;
+            for (var i = 0; i < addresses.length; i++) {
+              if (addresses[i].id === addressId) {
+                address = addresses[i];
+                break;
+              }
+            }
+            if (!address) {
+              swal('请选择收货地址', '', 'warning');
+              return;
+            }
+
             var req = {
-              address_id: addressSelect ? addressSelect.value : null,
+              address: {
+                province: address.province,
+                city: address.city,
+                district: address.district,
+                address: address.address,
+                zip: address.zip,
+                contact_name: address.contact_name,
+                contact_phone: address.contact_phone,
+              },
               sku_id: checkedSku.value,
             };
 

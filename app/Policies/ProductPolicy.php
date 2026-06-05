@@ -14,57 +14,57 @@ class ProductPolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:ProductResource');
+        return $authUser->can('ViewAny:SeckillProductsResource');
     }
 
     public function view(AuthUser $authUser, Product $product): bool
     {
-        return $authUser->can('View:ProductResource');
+        return $authUser->can('View:SeckillProductsResource');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:ProductResource');
+        return $authUser->can('Create:SeckillProductsResource');
     }
 
     public function update(AuthUser $authUser, Product $product): bool
     {
-        return $authUser->can('Update:ProductResource');
+        return $authUser->can('Update:SeckillProductsResource');
     }
 
     public function delete(AuthUser $authUser, Product $product): bool
     {
-        return $authUser->can('Delete:ProductResource');
+        return $authUser->can('Delete:SeckillProductsResource');
     }
 
     public function restore(AuthUser $authUser, Product $product): bool
     {
-        return $authUser->can('Restore:ProductResource');
+        return $authUser->can('Restore:SeckillProductsResource');
     }
 
     public function forceDelete(AuthUser $authUser, Product $product): bool
     {
-        return $authUser->can('ForceDelete:ProductResource');
+        return $authUser->can('ForceDelete:SeckillProductsResource');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:ProductResource');
+        return $authUser->can('ForceDeleteAny:SeckillProductsResource');
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:ProductResource');
+        return $authUser->can('RestoreAny:SeckillProductsResource');
     }
 
     public function replicate(AuthUser $authUser, Product $product): bool
     {
-        return $authUser->can('Replicate:ProductResource');
+        return $authUser->can('Replicate:SeckillProductsResource');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:ProductResource');
+        return $authUser->can('Reorder:SeckillProductsResource');
     }
 
 }
