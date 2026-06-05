@@ -6,6 +6,7 @@ use App\Filament\Resources\SeckillProducts\SeckillProductsResource;
 use App\Models\Product;
 use App\Support\Products\SyncProductMinPrice;
 use App\Support\Products\SyncProductToElasticsearch;
+use App\Support\Products\SyncSeckillSkuStockToRedis;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSeckillProduct extends EditRecord
@@ -64,5 +65,6 @@ class EditSeckillProduct extends EditRecord
 
         SyncProductMinPrice::run($this->record);
         SyncProductToElasticsearch::run($this->record);
+        SyncSeckillSkuStockToRedis::run($this->record);
     }
 }

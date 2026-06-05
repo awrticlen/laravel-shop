@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Requests;
 
+use App\Exceptions\InvalidRequestException;
 use App\Models\Order;
-use App\Models\Product;
 use App\Models\ProductSku;
-use Illuminate\Validation\Rule;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 
 class SeckillOrderRequest extends Request
 {
@@ -18,39 +21,39 @@ class SeckillOrderRequest extends Request
             'address.zip'           => 'required',
             'address.contact_name'  => 'required',
             'address.contact_phone' => 'required',
-            'sku_id'     => [
+            'sku_id'                => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    if (!$sku = ProductSku::find($value)) {
+                    $stock = Redis::get('seckill_sku_'.$value);
+                    if (is_null($stock)) {
                         return $fail('该商品不存在');
                     }
-                    if ($sku->product->type !== Product::TYPE_SECKILL) {
-                        return $fail('该商品不支持秒杀');
+                    if ((int) $stock < 1) {
+                        return $fail('该商品已售完');
                     }
+
+                    $sku = ProductSku::find($value);
                     if ($sku->product->seckill->is_before_start) {
                         return $fail('秒杀尚未开始');
                     }
                     if ($sku->product->seckill->is_after_end) {
                         return $fail('秒杀已经结束');
                     }
-                    if (!$sku->product->on_sale) {
-                        return $fail('该商品未上架');
+
+                    if (! $user = Auth::user()) {
+                        throw new AuthenticationException('请先登录');
                     }
-                    if ($sku->stock < 1) {
-                        return $fail('该商品已售完');
+                    if (! $user->email_verified_at) {
+                        throw new InvalidRequestException('请先验证邮箱');
                     }
 
                     if ($order = Order::query()
-                        // 筛选出当前用户的订单
-                        ->where('user_id', $this->user()->id)
+                        ->where('user_id', $user->id)
                         ->whereHas('items', function ($query) use ($value) {
-                            // 筛选出包含当前 SKU 的订单
                             $query->where('product_sku_id', $value);
                         })
                         ->where(function ($query) {
-                            // 已支付的订单
                             $query->whereNotNull('paid_at')
-                                // 或者未关闭的订单
                                 ->orWhere('closed', false);
                         })
                         ->first()) {
