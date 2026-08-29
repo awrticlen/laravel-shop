@@ -25,38 +25,63 @@ body {
   margin-top: 0px;
 }
 
-/* 顶部「所有类目」多级下拉：原 .dropdown-submenu 教程样式，已改为 BS5 的 li.dropend，且限定在 #categoryTree 旁的一级菜单内，避免影响用户头像等其它下拉 */
+/* 顶部「所有类目」多级下拉，仅作用于类目菜单，避免影响用户头像等其它下拉。 */
 #categoryTree+ul.dropdown-menu {
   >li.dropend {
     position: relative;
   }
 
-  li.dropend>.dropdown-toggle::after {
-    position: absolute;
-    right: 3px;
-    top: 40%;
+  .category-item-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .category-item-link {
+    flex: 0 1 auto;
+    width: auto;
+  }
+
+  .category-item-toggle {
+    width: 28px;
+    min-height: 38px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .category-item-toggle::after {
+    margin: 0;
   }
 }
 
 @media (min-width: 992px) {
 
-  #categoryTree+ul.dropdown-menu li.dropend:hover>.dropdown-menu,
-  #categoryTree+ul.dropdown-menu li.dropend:focus-within>.dropdown-menu {
+  #categoryTree+ul.dropdown-menu li.dropend:hover>.category-item-row>.dropdown-menu,
+  #categoryTree+ul.dropdown-menu li.dropend:focus-within>.category-item-row>.dropdown-menu {
     display: flex !important;
     flex-direction: column;
     position: absolute !important;
-    margin-top: -30px;
+    margin-top: -38px;
     left: 100%;
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
   #categoryTree+ul.dropdown-menu {
-    width: 50%;
+    width: 100%;
   }
 
-  #categoryTree+ul.dropdown-menu li.dropend {
-    width: auto;
+  /* 手机端的子类目在父级下方展开，分类名称仍可直接跳转。 */
+  #categoryTree+ul.dropdown-menu li.dropend>.category-item-row>.dropdown-menu {
+    position: static;
+    float: none;
+    width: 100%;
+    flex-basis: 100%;
+    margin: 0;
+    padding-left: 1rem;
+    border: 0;
+    background: transparent;
   }
 }
 
@@ -866,5 +891,114 @@ body {
   .payment-buttons {
     margin-top: 10px;
     padding-right: 10px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  /* 商品列表：手机端保留两列商品卡片，减少横向留白。 */
+  .products-index-page {
+    .card-body {
+      padding: .75rem;
+    }
+
+    .search-form {
+      padding: 0 0 .75rem;
+
+      .category-breadcrumb {
+        width: 100%;
+        margin-bottom: .25rem;
+        white-space: normal;
+      }
+
+      .search-input {
+        flex: 1 1 0;
+      }
+
+      .search-input .form-control,
+      .form-select {
+        width: 100%;
+      }
+
+      .form-select {
+        float: none !important;
+      }
+    }
+
+    .filters> .row {
+      margin: 0;
+    }
+
+    .filters .filter-key,
+    .filters .filter-values {
+      flex: 0 0 100%;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .filters .filter-values a {
+      display: inline-block;
+      margin-right: 1rem;
+    }
+
+    .products-list {
+      padding: 0;
+      --bs-gutter-x: .5rem;
+    }
+
+    .product-item {
+      padding: 0 .25rem;
+      margin-bottom: .5rem;
+
+      .product-content .top {
+        padding: .4rem;
+      }
+    }
+  }
+
+  /* 商品详情：图片、规格和操作按钮改为单列显示。 */
+  .products-show-page {
+    .cover {
+      padding: 10px 0;
+      margin-bottom: .5rem;
+    }
+
+    .title {
+      font-size: 20px;
+      line-height: 1.4;
+    }
+
+    .sales_and_reviews {
+      flex-wrap: wrap;
+
+      &>div {
+        width: 50%;
+      }
+    }
+
+    .skus {
+      display: flex;
+      align-items: flex-start;
+
+      .btn-group {
+        flex: 1;
+        flex-wrap: wrap;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      padding-left: 0;
+    }
+
+    .product-detail .tab-content {
+      padding: .75rem;
+      overflow-x: auto;
+    }
+
+    .properties-list .properties-list-body li {
+      width: 50%;
+    }
   }
 }

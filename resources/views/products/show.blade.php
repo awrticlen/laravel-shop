@@ -8,11 +8,11 @@
         <div class="card">
           <div class="card-body product-info">
             <div class="row">
-              <div class="col-5">
+              <div class="col-12 col-md-5">
                 <img class="cover" src="{{ $product->image_url ?: 'https://picsum.photos/seed/' . $product->id . '/400/400' }}"
                   alt="{{ $product->title }}" onerror="this.src='https://picsum.photos/seed/{{ $product->id }}/400/400'">
               </div>
-              <div class="col-7">
+              <div class="col-12 col-md-7">
                 <div class="title">{{ $product->long_title ?: $product->title }}</div>
                 @if ($product->type === \App\Models\Product::TYPE_CROWDFUNDING)
                   <div class="crowdfunding-info">
@@ -167,7 +167,7 @@
                 <div class="row products-list">
                   <!-- 这里不能使用 $product 作为 foreach 出来的变量，否则会覆盖掉当前页面的 $product 变量 -->
                   @foreach ($similar as $p)
-                    <div class="col-3 product-item">
+                    <div class="col-6 col-sm-4 col-lg-3 product-item">
                       <div class="product-content">
                         <div class="top">
                           <div class="img">

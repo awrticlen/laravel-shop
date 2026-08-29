@@ -43,8 +43,8 @@
         @endforeach
         <!-- 商品属性面包屑结束 -->
         </div>
-        <div class="col-auto"><input type="text" class="form-control form-control-sm" name="search" placeholder="搜索"></div>
-        <div class="col-auto"><button class="btn btn-primary btn-sm">搜索</button></div>
+        <div class="col-auto search-input"><input type="text" class="form-control form-control-sm" name="search" placeholder="搜索"></div>
+        <div class="col-auto search-submit"><button class="btn btn-primary btn-sm">搜索</button></div>
       </div>
     </div>
     <div class="col-md-3">
@@ -95,7 +95,7 @@
     <!-- 展示子类目结束 -->
     <div class="row products-list">
       @foreach($products as $product)
-        <div class="col-3 product-item">
+        <div class="col-6 col-sm-4 col-lg-3 product-item">
           <div class="product-content">
             <div class="top">
             <div class="img">
